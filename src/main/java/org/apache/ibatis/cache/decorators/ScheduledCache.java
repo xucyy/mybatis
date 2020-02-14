@@ -21,15 +21,19 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ * todo 是周期性清理缓存的装饰器
  */
 public class ScheduledCache implements Cache {
 
   private final Cache delegate;
+  //todo 记录两次缓存清理之间的时间间隔
   protected long clearInterval;
+  //todo 记录最近一次清理时间戳
   protected long lastClear;
 
   public ScheduledCache(Cache delegate) {
     this.delegate = delegate;
+    //todo 清理时间默认1小时
     this.clearInterval = TimeUnit.HOURS.toMillis(1);
     this.lastClear = System.currentTimeMillis();
   }
@@ -82,6 +86,7 @@ public class ScheduledCache implements Cache {
     return delegate.equals(obj);
   }
 
+  //todo 判断时间是否够了 到了清理时间
   private boolean clearWhenStale() {
     if (System.currentTimeMillis() - lastClear > clearInterval) {
       clear();

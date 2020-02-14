@@ -27,23 +27,40 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * todo  解析mapper中result标签后对应的实体类
  */
 public class ResultMapping {
 
+  //todo 全局configuration对象
   private Configuration configuration;
+  //todo 对应的是节点的property属性，表示的是与该列进行映射的属性
   private String property;
+  //todo 对应节点的column属性，表示的是从数据库中得到的列名或是列名的别名
   private String column;
+  //todo 对应节点的javaType属性，表示的是一个JavaBean的完全全限定名，或一个类型别名
   private Class<?> javaType;
+  //todo 对应节点的jdbcType实行，表示的是进行映射的列的JDBC类型
   private JdbcType jdbcType;
+  //todo 对应节点的typeHandler属性，表示的是类型处理器，它会覆盖默认的类型处理器
   private TypeHandler<?> typeHandler;
+  //todo 对应节点的resultMap属性，该属性通过id引用了另一个resultMap节点定义，它负责将结果集中的一部分列映射成其他关联的结果对象
+  //  这样我们就可以通过join方式进行关联查询，然后直接映射成过个对象，并同时设置这些对象之间的组合关系
   private String nestedResultMapId;
+  //todo  对应节点的select属性，该属性通过id引用了另一个<select>节点定义，它会把指定的列的值传入select属性指定的select语句中作为参数进行查询
   private String nestedQueryId;
+  //todo 对应节点的notNullColumn属性拆分后的结果
   private Set<String> notNullColumns;
+  //todo 对应节点的columnPrefix属性
   private String columnPrefix;
+  //todo 处理后的标志，标志共两个：id和constructor
   private List<ResultFlag> flags;
+  //todo 对应节点的column属性拆分后生成的结果，composistes.size()>0会使column为null
   private List<ResultMapping> composites;
+  //todo 对应节点的resultSet属性
   private String resultSet;
+  //todo 对应节点的foreignColumn属性
   private String foreignColumn;
+  //todo 是否延迟加载，对应节点的fetchType属性
   private boolean lazy;
 
   ResultMapping() {

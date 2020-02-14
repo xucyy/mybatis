@@ -26,17 +26,19 @@ import org.xml.sax.SAXException;
 
 /**
  * Offline entity resolver for the MyBatis DTDs.
- *
+ * todo 用于加载本地的xml中的DTD文件
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class XMLMapperEntityResolver implements EntityResolver {
 
+  //todo 指定mybatis-config.xml文件和映射文件对应的DTD的SystemId
   private static final String IBATIS_CONFIG_SYSTEM = "ibatis-3-config.dtd";
   private static final String IBATIS_MAPPER_SYSTEM = "ibatis-3-mapper.dtd";
   private static final String MYBATIS_CONFIG_SYSTEM = "mybatis-3-config.dtd";
   private static final String MYBATIS_MAPPER_SYSTEM = "mybatis-3-mapper.dtd";
 
+  //todo 指定mybatis-config.xml文件和映射文件对应的DTD文件的具体位置
   private static final String MYBATIS_CONFIG_DTD = "org/apache/ibatis/builder/xml/mybatis-3-config.dtd";
   private static final String MYBATIS_MAPPER_DTD = "org/apache/ibatis/builder/xml/mybatis-3-mapper.dtd";
 
@@ -46,7 +48,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
    * @param publicId The public id that is what comes after "PUBLIC"
    * @param systemId The system id that is what comes after the public id.
    * @return The InputSource for the DTD
-   *
+   * todo 该方法是EntityResolver接口中定义的方法，
    * @throws org.xml.sax.SAXException If anything goes wrong
    */
   @Override
@@ -54,6 +56,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
     try {
       if (systemId != null) {
         String lowerCaseSystemId = systemId.toLowerCase(Locale.ENGLISH);
+        //todo 查找systemId指定的DTD文档，并调用getInputSource方法读取DTD文档
         if (lowerCaseSystemId.contains(MYBATIS_CONFIG_SYSTEM) || lowerCaseSystemId.contains(IBATIS_CONFIG_SYSTEM)) {
           return getInputSource(MYBATIS_CONFIG_DTD, publicId, systemId);
         } else if (lowerCaseSystemId.contains(MYBATIS_MAPPER_SYSTEM) || lowerCaseSystemId.contains(IBATIS_MAPPER_SYSTEM)) {
@@ -66,6 +69,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
     }
   }
 
+  //todo 负责加载DTD文档
   private InputSource getInputSource(String path, String publicId, String systemId) {
     InputSource source = null;
     if (path != null) {

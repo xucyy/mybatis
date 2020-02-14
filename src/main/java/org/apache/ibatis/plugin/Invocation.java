@@ -20,11 +20,14 @@ import java.lang.reflect.Method;
 
 /**
  * @author Clinton Begin
+ * todo 封装目标对象
  */
 public class Invocation {
-
+  //todo 封装目标对象
   private final Object target;
+  //todo 封装对象方发
   private final Method method;
+  //todo 封装参数
   private final Object[] args;
 
   public Invocation(Object target, Method method, Object[] args) {
@@ -46,6 +49,7 @@ public class Invocation {
   }
 
   public Object proceed() throws InvocationTargetException, IllegalAccessException {
+    //todo 执行目标方法
     return method.invoke(target, args);
   }
 

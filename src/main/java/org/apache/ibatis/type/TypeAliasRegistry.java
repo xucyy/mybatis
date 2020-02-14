@@ -34,11 +34,14 @@ import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
+ * todo  完成 java 类别名映射关系 ，可以在mybatis.config中配置 typeAlias来添加自定义的类别名
  */
 public class TypeAliasRegistry {
 
+  //todo 存储别名 对应class的关系
   private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
+  //todo 会在初始化的时候默认 添加一些java的基本类型
   public TypeAliasRegistry() {
     registerAlias("string", String.class);
 
@@ -101,7 +104,7 @@ public class TypeAliasRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  // throws class cast exception as well if types cannot be assigned
+  // todo  返回别名对应的Class对象
   public <T> Class<T> resolveAlias(String string) {
     try {
       if (string == null) {
@@ -138,6 +141,7 @@ public class TypeAliasRegistry {
     }
   }
 
+  //todo 尝试读取@Alias注解，然后注册到map中
   public void registerAlias(Class<?> type) {
     String alias = type.getSimpleName();
     Alias aliasAnnotation = type.getAnnotation(Alias.class);
@@ -147,15 +151,19 @@ public class TypeAliasRegistry {
     registerAlias(alias, type);
   }
 
+  //todo 注册别名对应的class
   public void registerAlias(String alias, Class<?> value) {
+    //todo 检测别名为空，报错
     if (alias == null) {
       throw new TypeException("The parameter alias cannot be null");
     }
     // issue #748
     String key = alias.toLowerCase(Locale.ENGLISH);
+    //todo 检测是否别名已经存在，报错
     if (typeAliases.containsKey(key) && typeAliases.get(key) != null && !typeAliases.get(key).equals(value)) {
       throw new TypeException("The alias '" + alias + "' is already mapped to the value '" + typeAliases.get(key).getName() + "'.");
     }
+    //todo 将别名与类的映射关系保存
     typeAliases.put(key, value);
   }
 

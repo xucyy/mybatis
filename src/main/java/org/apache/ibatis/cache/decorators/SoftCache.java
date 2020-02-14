@@ -25,13 +25,16 @@ import org.apache.ibatis.cache.Cache;
 /**
  * Soft Reference cache decorator
  * Thanks to Dr. Heinz Kabutz for his guidance here.
- *
+ * todo 其中缓存的对象是 软引用对象
  * @author Clinton Begin
  */
 public class SoftCache implements Cache {
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
+  //todo ReferenceQueue，引用队列，用于记录已经被GC回收的缓存项所对应的SoftEntry对象
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
+  //todo 底层封装的cache对象
   private final Cache delegate;
+  //todo 强连接的个数，默认是256个
   private int numberOfHardLinks;
 
   public SoftCache(Cache delegate) {
@@ -59,7 +62,9 @@ public class SoftCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
+    //todo 清除已经被GC回收的缓存项
     removeGarbageCollectedItems();
+    //todo 软引用中缓存的对象是SoftEntry
     delegate.putObject(key, new SoftEntry(key, value, queueOfGarbageCollectedEntries));
   }
 
@@ -67,6 +72,7 @@ public class SoftCache implements Cache {
   public Object getObject(Object key) {
     Object result = null;
     @SuppressWarnings("unchecked") // assumed delegate cache is totally managed by this cache
+      //todo 获取缓存中的对象
     SoftReference<Object> softReference = (SoftReference<Object>) delegate.getObject(key);
     if (softReference != null) {
       result = softReference.get();
@@ -74,6 +80,7 @@ public class SoftCache implements Cache {
         delegate.removeObject(key);
       } else {
         // See #586 (and #335) modifications need more than a read lock
+        //todo 更新hardLinksToAvoidGarbageCollection
         synchronized (hardLinksToAvoidGarbageCollection) {
           hardLinksToAvoidGarbageCollection.addFirst(result);
           if (hardLinksToAvoidGarbageCollection.size() > numberOfHardLinks) {
@@ -87,26 +94,32 @@ public class SoftCache implements Cache {
 
   @Override
   public Object removeObject(Object key) {
+    //todo 清理被GC回收的缓存项
     removeGarbageCollectedItems();
     return delegate.removeObject(key);
   }
 
   @Override
   public void clear() {
+    //todo 首先清理hardLinksToAvoidGarbageCollection
     synchronized (hardLinksToAvoidGarbageCollection) {
       hardLinksToAvoidGarbageCollection.clear();
     }
     removeGarbageCollectedItems();
+    //todo 之后清理缓存项
     delegate.clear();
   }
 
   private void removeGarbageCollectedItems() {
     SoftEntry sv;
+    //todo 遍历queueOfGarbageCollectedEntries集合
     while ((sv = (SoftEntry) queueOfGarbageCollectedEntries.poll()) != null) {
+      //todo 将已被GC回收的value对象对应的缓存项清除
       delegate.removeObject(sv.key);
     }
   }
 
+  //todo 继承于SoftReference
   private static class SoftEntry extends SoftReference<Object> {
     private final Object key;
 

@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * todo 负责创建对应的日志组件适配器
  */
 public final class LogFactory {
 
@@ -28,9 +29,11 @@ public final class LogFactory {
    */
   public static final String MARKER = "MYBATIS";
 
+  //todo 记录当前使用的第三方日志组件的适配器的构造方法
   private static Constructor<? extends Log> logConstructor;
 
   static {
+    //todo 按序加载并实例化对应日志组件的适配器
     tryImplementation(LogFactory::useSlf4jLogging);
     tryImplementation(LogFactory::useCommonsLogging);
     tryImplementation(LogFactory::useLog4J2Logging);
@@ -88,6 +91,7 @@ public final class LogFactory {
   }
 
   private static void tryImplementation(Runnable runnable) {
+    //todo 首先会检测logConstructor字段，若为空则调用Runnable.run方法
     if (logConstructor == null) {
       try {
         runnable.run();
@@ -99,11 +103,14 @@ public final class LogFactory {
 
   private static void setImplementation(Class<? extends Log> implClass) {
     try {
+      //todo 获取指定适配器的构造方法
       Constructor<? extends Log> candidate = implClass.getConstructor(String.class);
+      //todo 实例化适配器
       Log log = candidate.newInstance(LogFactory.class.getName());
       if (log.isDebugEnabled()) {
         log.debug("Logging initialized using '" + implClass + "' adapter.");
       }
+      //todo 初始化logConstructor字段
       logConstructor = candidate;
     } catch (Throwable t) {
       throw new LogException("Error setting Log implementation.  Cause: " + t, t);

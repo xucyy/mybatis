@@ -24,19 +24,28 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * todo 记录了 #{} 占位符中的参数属性
  */
 public class ParameterMapping {
 
   private Configuration configuration;
-
+  //todo 传入进来的参数name
   private String property;
+  //todo  输入参数还是输出参数
   private ParameterMode mode;
+  //todo 参数的java类型
   private Class<?> javaType = Object.class;
+  //todo 参数的JDBC类型
   private JdbcType jdbcType;
+  //todo 符点参数的精度
   private Integer numericScale;
+  //todo 参数对应的TypeHandler对象
   private TypeHandler<?> typeHandler;
+  //todo 参数对应的ResultMap的Id
   private String resultMapId;
+  //todo  参数对应的jdbcTypeName的属性
   private String jdbcTypeName;
+  //todo 目前不支持这个属性
   private String expression;
 
   private ParameterMapping() {

@@ -27,7 +27,7 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * PreparedStatement proxy to add logging.
- *
+ * todo 封装了 PreparedStatement对象,继承 BaseJdbcLogger和 实现InvocationHandler
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
@@ -40,25 +40,33 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
     super(statementLog, queryStack);
     this.statement = stmt;
   }
-
+  //todo 会为EXECUTE_METHODS集合中的方法，SET_METHODS集合中的方法，getResultSet()等方法提供代理
   @Override
   public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
     try {
+      //todo 如果是从object继承的方法，则直接调用，不做任何其他处理
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, params);
       }
+      //todo 调用了 EXECUTE_METHODS集合中的方法，也就是执行了与sql相关的方法
       if (EXECUTE_METHODS.contains(method.getName())) {
         if (isDebugEnabled()) {
+          //todo 日志输出，输出的是参数值以及参数类型
           debug("Parameters: " + getParameterValueString(), true);
         }
+        //todo 清除BaseJdbcLogger中定义的三个colume*集合
         clearColumnInfo();
         if ("executeQuery".equals(method.getName())) {
+          //todo 如果是调用 executeQuery方法，则为ResultSet创建代理对象
           ResultSet rs = (ResultSet) method.invoke(statement, params);
           return rs == null ? null : ResultSetLogger.newInstance(rs, statementLog, queryStack);
         } else {
+          //todo 不是 executeQuery方法，直接返回结果
           return method.invoke(statement, params);
         }
       } else if (SET_METHODS.contains(method.getName())) {
+        //todo 如果调用的是SET_METHODS集合中的方法，则通过setColumn()方法记录到BaseJdbcLogger中定义的
+        // 三个column*集合
         if ("setNull".equals(method.getName())) {
           setColumn(params[0], null);
         } else {
@@ -66,9 +74,11 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
         }
         return method.invoke(statement, params);
       } else if ("getResultSet".equals(method.getName())) {
+        //todo 如果调用getResultSet方法，则为ResultSet创建代理对象
         ResultSet rs = (ResultSet) method.invoke(statement, params);
         return rs == null ? null : ResultSetLogger.newInstance(rs, statementLog, queryStack);
       } else if ("getUpdateCount".equals(method.getName())) {
+        //todo 如果调用 getUpdateCount方法，则通过日志框架输出其结果
         int updateCount = (Integer) method.invoke(statement, params);
         if (updateCount != -1) {
           debug("   Updates: " + updateCount, false);
@@ -84,7 +94,7 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
 
   /**
    * Creates a logging version of a PreparedStatement.
-   *
+   * todo  创建 PreparedStatement的代理对象
    * @param stmt - the statement
    * @param statementLog - the statement log
    * @param queryStack - the query stack

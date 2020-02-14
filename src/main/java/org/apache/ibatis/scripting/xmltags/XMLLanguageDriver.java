@@ -30,6 +30,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Eduardo Macarron
+ * todo 默认使用的，在Configuration的构造方法中创建
  */
 public class XMLLanguageDriver implements LanguageDriver {
 

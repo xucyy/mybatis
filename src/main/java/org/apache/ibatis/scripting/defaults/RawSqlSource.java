@@ -28,6 +28,9 @@ import org.apache.ibatis.session.Configuration;
 /**
  * Static SqlSource. It is faster than {@link DynamicSqlSource} because mappings are
  * calculated during startup.
+ * todo  负责处理静态Sql
+ *   如果Sql节点只包含#{} 占位符，而不包含动态未解析的${} 占位符的话，则不是动态SQL语句，会创建StaticTextSqlNode
+ *   在XMLScriptBuilder.parseScriptNode()方法判断整个SQL节点是不是动态的，不是则创建RawSqlSource对象
  *
  * @since 3.2.0
  * @author Eduardo Macarron
@@ -43,9 +46,11 @@ public class RawSqlSource implements SqlSource {
   public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> clazz = parameterType == null ? Object.class : parameterType;
+    //todo 使用SqlSourceBuilder完成占位符的替换和ParameterMapping集合的创建，返回StaticSqlSource对象
     sqlSource = sqlSourceParser.parse(sql, clazz, new HashMap<>());
   }
 
+  //todo 通过 SqlNode.apply()方法完成SQL语句的拼装和初步处理
   private static String getSql(Configuration configuration, SqlNode rootSqlNode) {
     DynamicContext context = new DynamicContext(configuration, null);
     rootSqlNode.apply(context);
@@ -54,6 +59,7 @@ public class RawSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+    //todo 返回BoundSql
     return sqlSource.getBoundSql(parameterObject);
   }
 

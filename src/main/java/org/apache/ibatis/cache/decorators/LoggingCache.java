@@ -21,6 +21,7 @@ import org.apache.ibatis.logging.LogFactory;
 
 /**
  * @author Clinton Begin
+ * todo 是在Cache的基础上提供了日志功能，它通过hits字段 和requests字段记录了Cache的命中次数和访问次数
  */
 public class LoggingCache implements Cache {
 
@@ -56,6 +57,7 @@ public class LoggingCache implements Cache {
     if (value != null) {
       hits++;
     }
+    //todo 输出命中数/访问数，计算出命中率
     if (log.isDebugEnabled()) {
       log.debug("Cache Hit Ratio [" + getId() + "]: " + getHitRatio());
     }

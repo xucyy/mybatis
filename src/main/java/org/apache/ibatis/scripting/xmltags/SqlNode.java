@@ -17,7 +17,11 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ * todo 动态SQl节点类型
  */
 public interface SqlNode {
+  //todo apply()方法是SqlNode接口中的唯一方法，该方法会根据用户传入的实参，参数解析该SqlNode所记录的动态SQL节点
+  // 并调用DynamicContext.appendSql()方法将解析后的SQL片段追加到DynamicContext中保存
+  // 当SQL节点下的所有的SqlNode完成解析后，我们就可以从DynamicContext中获取一条动态生成的，完整的SQL语句
   boolean apply(DynamicContext context);
 }

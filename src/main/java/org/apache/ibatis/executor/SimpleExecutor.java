@@ -33,6 +33,7 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Clinton Begin
+ * todo 是最简单的Executor接口实现
  */
 public class SimpleExecutor extends BaseExecutor {
 
@@ -44,9 +45,13 @@ public class SimpleExecutor extends BaseExecutor {
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Statement stmt = null;
     try {
+      //todo 获取配置对象
       Configuration configuration = ms.getConfiguration();
+      //todo 创建StatementHandler对象，实际返回的是RoutingStatementHandler对象
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+      //todo 完成Statement的初始化，该方法首先会调用StatementHandler.prepare()方法创建Statement对象，然后调用StatementHandler.parameterize()处理占位符
       stmt = prepareStatement(handler, ms.getStatementLog());
+      //todo 调用update方法，执行Sql语句
       return handler.update(stmt);
     } finally {
       closeStatement(stmt);
@@ -60,6 +65,7 @@ public class SimpleExecutor extends BaseExecutor {
       Configuration configuration = ms.getConfiguration();
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
       stmt = prepareStatement(handler, ms.getStatementLog());
+      //todo 调用具体的Statement对象的query方法完成查询，并通过ResultSetHandler对象完成结果集的映射
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -81,10 +87,12 @@ public class SimpleExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
+  //todo 完成Statement的初始化
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
     stmt = handler.prepare(connection, transaction.getTimeout());
+    //todo 完成sql语句的占位符的替换
     handler.parameterize(stmt);
     return stmt;
   }

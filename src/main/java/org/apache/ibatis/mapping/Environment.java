@@ -20,12 +20,12 @@ import javax.sql.DataSource;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
- * @author Clinton Begin
+ * @author Clinton Begin TODO 数据源类
  */
 public final class Environment {
-  private final String id;
+  private final String id;//TODO ID
   private final TransactionFactory transactionFactory;
-  private final DataSource dataSource;
+  private final DataSource dataSource; //TODO  数据源
 
   public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
     if (id == null) {

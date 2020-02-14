@@ -23,11 +23,15 @@ import org.apache.ibatis.cache.CacheException;
 
 /**
  * @author Clinton Begin
+ * todo 也就是装饰者模式中的被装饰者，实现了最基本的缓存操作
+ *  Perpetual=永恒的
  */
 public class PerpetualCache implements Cache {
 
+  //todo cache对象的唯一标识
   private final String id;
 
+  //todo 利用hashMap记录缓存项,底下的许多 put remove等操作都是基于此hashMap操作
   private final Map<Object, Object> cache = new HashMap<>();
 
   public PerpetualCache(String id) {

@@ -21,9 +21,11 @@ import org.apache.ibatis.session.ResultContext;
  * @author Clinton Begin
  */
 public class DefaultResultContext<T> implements ResultContext<T> {
-
+  //todo 暂存映射后的结果对象，之后会将该对象放入到DefaultResultHandler.list集合中
   private T resultObject;
+  //todo 记录经过DefaultResultContext暂存的对象个数
   private int resultCount;
+  //todo 控制是否停止映射
   private boolean stopped;
 
   public DefaultResultContext() {
@@ -47,6 +49,7 @@ public class DefaultResultContext<T> implements ResultContext<T> {
     return stopped;
   }
 
+  //todo 将结果对象暂存，并计算之前已经存了多少个结果对象了
   public void nextResultObject(T resultObject) {
     resultCount++;
     this.resultObject = resultObject;

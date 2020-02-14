@@ -33,5 +33,6 @@ public interface DatabaseIdProvider {
     // NOP
   }
 
+  //todo  负责通过给定的DataSource来查找对应的databaseId
   String getDatabaseId(DataSource dataSource) throws SQLException;
 }

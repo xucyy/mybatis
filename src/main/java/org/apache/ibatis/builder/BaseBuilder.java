@@ -30,14 +30,20 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * todo 构造者抽象类 ，也就是建造者模式的建造者接口的角色
  */
 public abstract class BaseBuilder {
+  //todo Configuration是 mybatis初始化过程的核心对象，mybatis中几乎全部的配置信息都会保存到Configuration对象中
+  //  Configuration对象是在mybatis初始化过程中创建且全局唯一的
   protected final Configuration configuration;
+  //todo 将定义的别名<typeAliases>注册到 typeAliasRegistry中
   protected final TypeAliasRegistry typeAliasRegistry;
+  //todo 将定义的类型转换<typeHandler> 注册到typeHandlerRegistry中
   protected final TypeHandlerRegistry typeHandlerRegistry;
 
   public BaseBuilder(Configuration configuration) {
     this.configuration = configuration;
+    //todo 别名和类型转换 都是在configuration的初始化过程中创建的，是全局唯一的
     this.typeAliasRegistry = this.configuration.getTypeAliasRegistry();
     this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry();
   }
@@ -63,6 +69,7 @@ public abstract class BaseBuilder {
     return new HashSet<>(Arrays.asList(value.split(",")));
   }
 
+  //todo 将String转换成对象的 JDBC类型的 枚举
   protected JdbcType resolveJdbcType(String alias) {
     if (alias == null) {
       return null;
@@ -73,7 +80,7 @@ public abstract class BaseBuilder {
       throw new BuilderException("Error resolving JdbcType. Cause: " + e, e);
     }
   }
-
+  //todo 将String转换成对象的 ResultSet类型的 枚举
   protected ResultSetType resolveResultSetType(String alias) {
     if (alias == null) {
       return null;
@@ -84,7 +91,7 @@ public abstract class BaseBuilder {
       throw new BuilderException("Error resolving ResultSetType. Cause: " + e, e);
     }
   }
-
+  //todo 将String转换成对象的 ParameterMode类型的 枚举
   protected ParameterMode resolveParameterMode(String alias) {
     if (alias == null) {
       return null;
@@ -132,6 +139,7 @@ public abstract class BaseBuilder {
     return resolveTypeHandler(javaType, typeHandlerType);
   }
 
+  //todo 依赖于typeHandlerRegistry来解析 typeHandler
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
     if (typeHandlerType == null) {
       return null;
@@ -144,7 +152,7 @@ public abstract class BaseBuilder {
     }
     return handler;
   }
-
+  //todo 是依赖 typeAliasRegistry来解析别名
   protected <T> Class<? extends T> resolveAlias(String alias) {
     return typeAliasRegistry.resolveAlias(alias);
   }

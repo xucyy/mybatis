@@ -28,6 +28,7 @@ import org.apache.ibatis.datasource.DataSourceFactory;
 
 /**
  * @author Clinton Begin
+ * todo 利用jndi的机制 来初始化Datasource
  */
 public class JndiDataSourceFactory implements DataSourceFactory {
 

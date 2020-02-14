@@ -51,9 +51,12 @@ import org.apache.ibatis.type.TypeHandler;
 
 /**
  * @author Clinton Begin
+ * todo 是一个辅助类，可以帮助解析mapper文件，并进行保存解析内容
+ *  Assistant =助理  也就是 XmlMapper的 助理
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
+  //todo 当前mapper对应的namespace属性
   private String currentNamespace;
   private final String resource;
   private Cache currentCache;
@@ -102,25 +105,31 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
     return currentNamespace + "." + base;
   }
-
+  //todo 用来解析<cache-ref>节点引用
   public Cache useCacheRef(String namespace) {
+    //todo 如果namespace为空，则抛出异常
     if (namespace == null) {
       throw new BuilderException("cache-ref element requires a namespace attribute.");
     }
     try {
+      //todo 标识未成功解析Cache引用
       unresolvedCacheRef = true;
+      //todo 获取namespace对应的Cache对象
       Cache cache = configuration.getCache(namespace);
+      //todo 找不到Cache对象，抛出异常
       if (cache == null) {
         throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.");
       }
+      //todo 记录当前命名空间使用的Cache对象
       currentCache = cache;
+      //todo 标识已成功解析Cache引用
       unresolvedCacheRef = false;
       return cache;
     } catch (IllegalArgumentException e) {
       throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.", e);
     }
   }
-
+  //todo 用来创建Cache对象，并将其添加到Configuration.caches集合中保存
   public Cache useNewCache(Class<? extends Cache> typeClass,
       Class<? extends Cache> evictionClass,
       Long flushInterval,
@@ -128,6 +137,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       boolean readWrite,
       boolean blocking,
       Properties props) {
+    //todo 创建Cache对象，使用建造者模式，CacheBuilder是建造者的角色，而Cache是生成的产品
     Cache cache = new CacheBuilder(currentNamespace)
         .implementation(valueOrDefault(typeClass, PerpetualCache.class))
         .addDecorator(valueOrDefault(evictionClass, LruCache.class))
@@ -137,7 +147,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .blocking(blocking)
         .properties(props)
         .build();
+    //todo 将cache添加到Configuration.caches集合中保存，其中会将Cache的id作为key，Cache对象本身作为value
     configuration.addCache(cache);
+    //todo 记录当前命名空间使用的Cache对象
     currentCache = cache;
     return cache;
   }
@@ -172,7 +184,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .typeHandler(typeHandlerInstance)
         .build();
   }
-
+  //todo 将解析后的ResultMap对象添加到Configuration.resultMaps集合中
   public ResultMap addResultMap(
       String id,
       Class<?> type,
@@ -241,6 +253,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
   }
 
+  //todo 创建MappedStatement
   public MappedStatement addMappedStatement(
       String id,
       SqlSource sqlSource,
@@ -292,8 +305,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     if (statementParameterMap != null) {
       statementBuilder.parameterMap(statementParameterMap);
     }
-
+    //todo 创建MappedStatement
     MappedStatement statement = statementBuilder.build();
+    //todo  添加到 configuration 的mappedStatements中
     configuration.addMappedStatement(statement);
     return statement;
   }
@@ -353,6 +367,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return resultMaps;
   }
 
+  //todo 构建Mapper文件中的ResultMap中的 每条Result ，创建ResultMapping类
   public ResultMapping buildResultMapping(
       Class<?> resultType,
       String property,
@@ -368,14 +383,18 @@ public class MapperBuilderAssistant extends BaseBuilder {
       String resultSet,
       String foreignColumn,
       boolean lazy) {
+    //todo 解析<resultType> 节点指定的property属性的类型
     Class<?> javaTypeClass = resolveResultJavaType(resultType, property, javaType);
+    //todo 获取typeHandler指定的TypeHandler对象，底层依赖于typeHandlerRegistry
     TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, typeHandler);
+    //todo  解析column属性值，当column是"{prop1=col1,prop2=col2}"形式时，会解析成ResultMapping对象集合,column的这种形式主要用于嵌套查询的参数传递
     List<ResultMapping> composites;
     if ((nestedSelect == null || nestedSelect.isEmpty()) && (foreignColumn == null || foreignColumn.isEmpty())) {
       composites = Collections.emptyList();
     } else {
       composites = parseCompositeColumnName(column);
     }
+    //todo 创建ResultMapping.Builder对象，创建ResultMapping对象，并设置其字段
     return new ResultMapping.Builder(configuration, property, column, javaTypeClass)
         .jdbcType(jdbcType)
         .nestedQueryId(applyCurrentNamespace(nestedSelect, true))

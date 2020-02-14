@@ -30,6 +30,7 @@ import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
+ * todo 提供了将value对象序列化的功能
  */
 public class SerializedCache implements Cache {
 
@@ -49,6 +50,7 @@ public class SerializedCache implements Cache {
     return delegate.getSize();
   }
 
+  //todo 在添加缓存的时候，会将value对应的java对象进行序列化，并将序列化后的byte数组作为value存入缓存
   @Override
   public void putObject(Object key, Object object) {
     if (object == null || object instanceof Serializable) {
@@ -58,6 +60,7 @@ public class SerializedCache implements Cache {
     }
   }
 
+  //todo 在获取缓存结果时，会进行反序列化为java对象
   @Override
   public Object getObject(Object key) {
     Object object = delegate.getObject(key);

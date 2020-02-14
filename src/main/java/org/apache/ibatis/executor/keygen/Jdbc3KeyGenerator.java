@@ -46,6 +46,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * TODO 用于取回数据库生成的自增id，他对应于mybatis-config.xml配置文件中的useGeneratedKeys全局配置
+ *   以及映射配置文件中SQL节点<insert>节点的 useGeneratedKeys属性
  */
 public class Jdbc3KeyGenerator implements KeyGenerator {
 
@@ -70,13 +72,17 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
   public void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
     processBatch(ms, stmt, parameter);
   }
-
+  //todo 讲SQL语句执行后生成的主键记录到用户传递的实参中，比如 insert into xx values (#{xx}) 参数List<User> user={"id":null,name="wang"},然后执行完插入后，会
+  //  返回ResultSet，把ResultSet中的返回id=1，填充到 参数list中 List<User> user={"id":1,name="wang"}
   public void processBatch(MappedStatement ms, Statement stmt, Object parameter) {
+    //todo 获取keyProperties属性置顶的属性名称，它表示主键对应的属性名称
     final String[] keyProperties = ms.getKeyProperties();
     if (keyProperties == null || keyProperties.length == 0) {
       return;
     }
+    //todo 获取数据库自动生成的主键，如果没有生成，直接返回空，遍历数据库生成的主键结果集，并设置到parameter集合对应元素的属性中
     try (ResultSet rs = stmt.getGeneratedKeys()) {
+      //todo 获取resetSet的元数据信息
       final ResultSetMetaData rsmd = rs.getMetaData();
       final Configuration configuration = ms.getConfiguration();
       if (rsmd.getColumnCount() < keyProperties.length) {

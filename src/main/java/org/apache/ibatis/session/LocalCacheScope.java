@@ -17,6 +17,7 @@ package org.apache.ibatis.session;
 
 /**
  * @author Eduardo Macarron
+ * todo 配置一级缓存的生命周期
  */
 public enum LocalCacheScope {
   SESSION,STATEMENT

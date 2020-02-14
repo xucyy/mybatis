@@ -29,20 +29,23 @@ import org.apache.ibatis.logging.LogFactory;
 
 /**
  * Provides a very simple API for accessing resources within an application server.
- *
+ * todo VFS表示虚拟文件系统，它用来查找指定路径下的资源
  * @author Ben Gunter
  */
 public abstract class VFS {
   private static final Log log = LogFactory.getLog(VFS.class);
 
   /** The built-in implementations. */
+  //todo 记录了mybatis提供的两个VFS的实现类
   public static final Class<?>[] IMPLEMENTATIONS = { JBoss6VFS.class, DefaultVFS.class };
 
   /** The list to which implementations are added by {@link #addImplClass(Class)}. */
+  //todo 记录了用户自定义的VFS的实现类
   public static final List<Class<? extends VFS>> USER_IMPLEMENTATIONS = new ArrayList<>();
 
   /** Singleton instance holder. */
   private static class VFSHolder {
+    //todo 单例模式，记录了全局唯一的VFS对象
     static final VFS INSTANCE = createVFS();
 
     @SuppressWarnings("unchecked")
@@ -89,7 +92,7 @@ public abstract class VFS {
   /**
    * Adds the specified class to the list of {@link VFS} implementations. Classes added in this
    * manner are tried in the order they are added and before any of the built-in implementations.
-   *
+   *  todo 可以将用户自定义的VFS实现类添加到 USER_IMPLEMENTATIONS集合中
    * @param clazz The {@link VFS} implementation class to add.
    */
   public static void addImplClass(Class<? extends VFS> clazz) {
@@ -172,6 +175,7 @@ public abstract class VFS {
   }
 
   /** Return true if the {@link VFS} implementation is valid for the current environment. */
+  //todo 用于检测当前VFS对象在当前环境下是否有效
   public abstract boolean isValid();
 
   /**
@@ -189,7 +193,7 @@ public abstract class VFS {
   /**
    * Recursively list the full resource path of all the resources that are children of all the
    * resources found at the specified path.
-   *
+   * todo 负责查找指定的资源名称列表
    * @param path The path of the resource(s) to list.
    * @return A list containing the names of the child resources.
    * @throws IOException If I/O errors occur

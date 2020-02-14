@@ -22,12 +22,15 @@ import org.apache.ibatis.logging.Log;
 
 /**
  * @author Clinton Begin
+ * todo 封装 java.util.logging.Logger
  */
 public class Jdk14LoggingImpl implements Log {
 
+  //todo 底层封装的java.util.logging.Logger对象
   private final Logger log;
 
   public Jdk14LoggingImpl(String clazz) {
+    //todo 初始化java.util.logging.Logger 对象
     log = Logger.getLogger(clazz);
   }
 
@@ -41,6 +44,7 @@ public class Jdk14LoggingImpl implements Log {
     return log.isLoggable(Level.FINER);
   }
 
+  //todo 将具体实现交给了对应的第三方日志组件
   @Override
   public void error(String s, Throwable e) {
     log.log(Level.SEVERE, s, e);

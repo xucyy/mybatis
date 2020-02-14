@@ -97,9 +97,13 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * todo 是全局性的配置对象，在Mybatis初始化的过程中，所有配置信息会被解析成相应的对象并记录到Configuration中
+ *  Configuration是 mybatis初始化过程的核心对象，mybatis中几乎全部的配置信息都会保存到Configuration对象中
+ *   Configuration对象是在mybatis初始化过程中创建且全局唯一的
  */
 public class Configuration {
 
+  //TODO  环境变量，存放数据源
   protected Environment environment;
 
   protected boolean safeRowBoundsEnabled;
@@ -124,17 +128,22 @@ public class Configuration {
   protected Integer defaultFetchSize;
   protected ResultSetType defaultResultSetType;
   protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
+  //todo  是否开启自动映射功能的条件之一
   protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
   protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
 
+  //todo 在XMLConfigBuilder中解析出来的properties标签内容
   protected Properties variables = new Properties();
   protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
+  //todo 可以根据mybatis-config.xml中配置的objectFactory标签改变 ，在XMLConfigBuilder的时候解析配置
   protected ObjectFactory objectFactory = new DefaultObjectFactory();
+  //todo 可以根据mybatis-config.xml中配置的objectWrapperFactory标签改变 ，在XMLConfigBuilder的时候解析配置
   protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
 
   protected boolean lazyLoadingEnabled = false;
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
+  //todo mybatis-config.xml中指定的 数据库标识，代表是哪个数据库
   protected String databaseId;
   /**
    * Configuration factory class.
@@ -144,15 +153,19 @@ public class Configuration {
    */
   protected Class<?> configurationFactory;
 
+  //todo 它记录当前使用的MapperRegistry对象
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
+  //todo 他记录了配置的插件类，作为拦截器链
   protected final InterceptorChain interceptorChain = new InterceptorChain();
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
   protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
+  //todo 存储mapper文件中的每一个 SQL语句节点  <select>  <insert>  <update> <delete>
   protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")
       .conflictMessageProducer((savedValue, targetValue) ->
           ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
+  //todo 保存mapper文件中配置的cache节点，记录Cache的id(默认是映射文件的namespace)与Cache对象(二级缓存)之间的对应关系。
   protected final Map<String, Cache> caches = new StrictMap<>("Caches collection");
   protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection");
   protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection");
@@ -161,15 +174,20 @@ public class Configuration {
   protected final Set<String> loadedResources = new HashSet<>();
   protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
 
+  //todo 记录着解析<select> <update>等sql语句节点时出现异常存放的地方
   protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
+  //todo 记录着解析<cache-ref>时候出现异常的CacheRefResolver对象
   protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
+  //todo 记录着解析<resultMap>时候出现异常的存放ResultMapResolver对象
   protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
+  //todo 记录着解析mapper接口中注解时候出现异常存放的地方
   protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
 
   /*
    * A map holds cache-ref relationship. The key is the namespace that
    * references a cache bound to another namespace and the value is the
    * namespace which the actual cache is bound to.
+   * todo 该集合其中的key是 <cache-ref>节点所在的namespace,value是<cache-ref>节点的namespace属性所指定的namespace,也就是使用别的namespace的cache
    */
   protected final Map<String, String> cacheRefMap = new HashMap<>();
 
@@ -597,7 +615,7 @@ public class Configuration {
   public Executor newExecutor(Transaction transaction) {
     return newExecutor(transaction, defaultExecutorType);
   }
-
+  //TODO new 一个执行器
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
     executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
@@ -607,11 +625,14 @@ public class Configuration {
     } else if (ExecutorType.REUSE == executorType) {
       executor = new ReuseExecutor(this, transaction);
     } else {
+      //TODO  创建默认执行器
       executor = new SimpleExecutor(this, transaction);
     }
     if (cacheEnabled) {
+      //TODO 如果开启缓存，就采用装饰者模式，将之前的执行器包装一下，生成缓存执行器
       executor = new CachingExecutor(executor);
     }
+    //TODO 通过interceptorChain.pluginAll方法创建Executor的代理对象 插件原理
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }
@@ -899,7 +920,7 @@ public class Configuration {
       }
     }
   }
-
+  //todo 继承于HashMap，重点修改了put方法
   protected static class StrictMap<V> extends HashMap<String, V> {
 
     private static final long serialVersionUID = -4950446264854982944L;
@@ -939,26 +960,32 @@ public class Configuration {
       return this;
     }
 
+    //todo 做了自定义
     @Override
     @SuppressWarnings("unchecked")
     public V put(String key, V value) {
+      //todo 如果已经包含了这个key ，那么就直接报错
       if (containsKey(key)) {
         throw new IllegalArgumentException(name + " already contains value for " + key
             + (conflictMessageProducer == null ? "" : conflictMessageProducer.apply(super.get(key), value)));
       }
+      //todo 按照"." 将key切分成数组，并将数组的最后一项作为shortKey
       if (key.contains(".")) {
         final String shortKey = getShortName(key);
         if (super.get(shortKey) == null) {
           super.put(shortKey, value);
         } else {
+          //todo 如果shortKey已经存在，则将value修改成Ambiguity对象
           super.put(shortKey, (V) new Ambiguity(shortKey));
         }
       }
+      //todo 没有.直接 put进去
       return super.put(key, value);
     }
 
     @Override
     public V get(Object key) {
+      //todo 检测value是否存在 以及value是否为Ambiguity类型，如果满足任何一个，则抛出异常
       V value = super.get(key);
       if (value == null) {
         throw new IllegalArgumentException(name + " does not contain value for " + key);
@@ -970,6 +997,7 @@ public class Configuration {
       return value;
     }
 
+    //todo 记录二义性的key，并提供了相应的getter方法
     protected static class Ambiguity {
       final private String subject;
 

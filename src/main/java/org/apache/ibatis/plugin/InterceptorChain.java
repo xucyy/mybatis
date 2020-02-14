@@ -20,14 +20,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author Clinton Begin
+ * @author Clinton Begin TODO 拦截器链，里面存放着一个拦截器List，用于存放拦截器
  */
 public class InterceptorChain {
 
+  //todo 用于存放拦截器
   private final List<Interceptor> interceptors = new ArrayList<>();
 
+  //todo 遍历拦截器链
   public Object pluginAll(Object target) {
     for (Interceptor interceptor : interceptors) {
+      //todo 调用Interceptor.plugin（）方法
       target = interceptor.plugin(target);
     }
     return target;

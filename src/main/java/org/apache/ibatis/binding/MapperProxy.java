@@ -32,6 +32,7 @@ import org.apache.ibatis.session.SqlSession;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * todo 实现了InvocationHandler接口，利用JDK动态代理完成对mapper接口的代理
  */
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
@@ -40,8 +41,11 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
       | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC;
   private static final Constructor<Lookup> lookupConstructor;
   private static final Method privateLookupInMethod;
+  //todo 记录了关联的SqlSession对象
   private final SqlSession sqlSession;
+  //todo mapper接口对应的class对象
   private final Class<T> mapperInterface;
+  //todo 用于缓存MapperMethod对象，key是Mapper方法对应的Method对象，value是对应的MapperMethod对象
   private final Map<Method, MapperMethodInvoker> methodCache;
 
   public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface, Map<Method, MapperMethodInvoker> methodCache) {
@@ -79,9 +83,11 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+      //todo 如果是object的方法，则直接执行
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else {
+        //todo 从缓存中获取方法对应的 MapperMethod，然后执行MapperMethod.execute方法
         return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
       }
     } catch (Throwable t) {
@@ -89,6 +95,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
   }
 
+  //todo 从缓存 方法缓存中得到 MapperMethodInvoker,用于得到MapperMethod
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
     try {
       return methodCache.computeIfAbsent(method, m -> {

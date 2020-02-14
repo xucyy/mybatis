@@ -17,10 +17,13 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Frank D. Martinez [mnesarco]
+ * todo 表示的是动态SQL语句中的<bind>节点，该节点可以从OGNL表达式中创建一个变量并将其记录到上下文中
  */
 public class VarDeclSqlNode implements SqlNode {
 
+  //todo 记录<bind> 节点的name 属性值
   private final String name;
+  //todo 记录<bind> 节点的value 属性值
   private final String expression;
 
   public VarDeclSqlNode(String var, String exp) {
@@ -30,7 +33,9 @@ public class VarDeclSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+    //todo 解析OGNL表达式的值
     final Object value = OgnlCache.getValue(expression, context.getBindings());
+    //todo 将name和表达式的值 存入DynamicContext.bindings集合中
     context.bind(name, value);
     return true;
   }

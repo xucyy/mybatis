@@ -19,6 +19,8 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ * todo 是一个简单的Cache引用解析器，封装了被引用的namespace
+ *  以及当前XMLMapperBuilder对应的MapperBuilderAssistant对象
  */
 public class CacheRefResolver {
   private final MapperBuilderAssistant assistant;

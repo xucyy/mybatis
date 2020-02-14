@@ -31,13 +31,16 @@ import org.apache.ibatis.session.RowBounds;
 
 /**
  * @author Clinton Begin
+ * todo RoutingStatementHandler会根据MappedStatement中指定的statementType字段，创建对应的StatementHandler接口实现
  */
 public class RoutingStatementHandler implements StatementHandler {
 
+  //todo  底层封装的真正的StatementHandler对象
   private final StatementHandler delegate;
 
   public RoutingStatementHandler(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
 
+    //todo 根据MappedStatement的配置，生成一个对应的Statement对象，并设置到delegate中
     switch (ms.getStatementType()) {
       case STATEMENT:
         delegate = new SimpleStatementHandler(executor, ms, parameter, rowBounds, resultHandler, boundSql);

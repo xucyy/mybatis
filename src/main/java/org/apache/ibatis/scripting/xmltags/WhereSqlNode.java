@@ -22,9 +22,10 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo where 节点 继承trimSqlNode，如果在where语句中，sql指定前缀如果是 and or 的话  就去掉前缀 ，不对后缀做处理
  */
 public class WhereSqlNode extends TrimSqlNode {
-
+  //todo 指定的prefixesToOverride 集合项是 and or
   private static List<String> prefixList = Arrays.asList("AND ","OR ","AND\n", "OR\n", "AND\r", "OR\r", "AND\t", "OR\t");
 
   public WhereSqlNode(Configuration configuration, SqlNode contents) {

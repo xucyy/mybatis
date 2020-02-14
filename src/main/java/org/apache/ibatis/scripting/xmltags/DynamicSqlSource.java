@@ -22,10 +22,13 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo 动态SQL,负责处理动态SQL语句
+ *   DynamicSqlSource中封装的Sql语句还需要进行一些列的解析，才会最终形成数据库可执行的SQL语句
  */
 public class DynamicSqlSource implements SqlSource {
 
   private final Configuration configuration;
+  //todo SQLnode中使用了组合模式，形成一个树装结构，使用rootSqlNode记录了待极细SQLNode树的根节点
   private final SqlNode rootSqlNode;
 
   public DynamicSqlSource(Configuration configuration, SqlNode rootSqlNode) {
@@ -35,11 +38,17 @@ public class DynamicSqlSource implements SqlSource {
 
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
+    //todo 创建 DynamicContext对象，parameterObject是用户传入的实参
     DynamicContext context = new DynamicContext(configuration, parameterObject);
+    //todo 通过调用 apply方法调用整个树形结构中全部SqlNode.apply()方法，每个SqlNode的apply()方法都将解析得到的SQL语句追加
+    //  到context中，最终通过context.getSql得到完整的SQL语句
     rootSqlNode.apply(context);
+    //todo 创建SqlSourceBuilder
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
+    //todo  创建 SqlSource
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
+    //todo  创建BoundSql对象，并将DynamicContext.bindings中的参数复制到其additionalParameters集合中保存
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;

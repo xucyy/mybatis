@@ -24,13 +24,17 @@ import org.apache.ibatis.cursor.Cursor;
 
 /**
  * @author Clinton Begin
+ *  todo 负责将数据库查询结果 转换成 resultMap  resultType
  */
 public interface ResultSetHandler {
 
+  //todo  处理结果集，生成相应的结果对象集合
   <E> List<E> handleResultSets(Statement stmt) throws SQLException;
 
+  //todo 处理结果集，返回相应的游标对象
   <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException;
 
+  //todo 处理存储过程的输出参数
   void handleOutputParameters(CallableStatement cs) throws SQLException;
 
 }

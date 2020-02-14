@@ -19,6 +19,7 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ * todo 通过在每个方法上加了synchronized关键字，使得每个方法都是同步的
  */
 public class SynchronizedCache implements Cache {
 

@@ -24,10 +24,14 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo DynamicSqlSource 和RawSqlSource都会将处理后的SQL语句封装成StaticSqlSource
+ *   staticSqlSource中记录的sqlkennel含有"?" 占位符，但是可以直接提交给数据库执行
  */
 public class StaticSqlSource implements SqlSource {
 
+  //todo 带有占位符"？"的参数
   private final String sql;
+  //todo 占位符参数
   private final List<ParameterMapping> parameterMappings;
   private final Configuration configuration;
 

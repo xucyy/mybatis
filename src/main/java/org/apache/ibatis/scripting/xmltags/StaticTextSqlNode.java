@@ -17,14 +17,17 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ * todo 使用 text字段记录了对应的非动态Sql语句
  */
 public class StaticTextSqlNode implements SqlNode {
+  //todo 记录非动态sql语句
   private final String text;
 
   public StaticTextSqlNode(String text) {
     this.text = text;
   }
 
+  //todo 该方法直接将text字段追加到DynamicContext.sqlBuilder字段中
   @Override
   public boolean apply(DynamicContext context) {
     context.appendSql(text);

@@ -22,18 +22,22 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * FIFO (first in, first out) cache decorator.
- *
+ * todo 利用先进先出的规则清理缓存，如果缓存项的个数已经达到上限，则会将缓存中最老（即最早进入缓存）的缓存项删除
  * @author Clinton Begin
  */
 public class FifoCache implements Cache {
 
+  //todo 底层被装饰的Cache对象
   private final Cache delegate;
+  //todo 用于记录key进入缓存的先后顺序，使用的是LinkedList<Object> 类型的集合对象
   private final Deque<Object> keyList;
+  //todo 记录了缓存项的上限，超过该值，就需要清理最老的缓存项
   private int size;
 
   public FifoCache(Cache delegate) {
     this.delegate = delegate;
     this.keyList = new LinkedList<>();
+    //todo 默认记录1024个key
     this.size = 1024;
   }
 
@@ -53,7 +57,9 @@ public class FifoCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
+    //todo 检测并清理缓存
     cycleKeyList(key);
+    //todo 调用底层封装的cache的putObject方法
     delegate.putObject(key, value);
   }
 
@@ -74,8 +80,10 @@ public class FifoCache implements Cache {
   }
 
   private void cycleKeyList(Object key) {
+    //todo 记录key
     keyList.addLast(key);
     if (keyList.size() > size) {
+      //todo  如果达到缓存上限，则清理最老的缓存项
       Object oldestKey = keyList.removeFirst();
       delegate.removeObject(oldestKey);
     }

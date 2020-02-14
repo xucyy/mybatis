@@ -23,6 +23,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Eduardo Macarron
+ * todo  用于创建代理对象
  */
 public interface ProxyFactory {
 

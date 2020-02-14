@@ -27,21 +27,27 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ * todo 依赖于ParameterHandler和ResultSetHandler 完成了Mybatis的核心功能，它控制这参数绑定，SQL语句执行，结果集映射的一系列核心流程
  */
 public interface StatementHandler {
 
+  //todo  从连接中获取一个Statement
   Statement prepare(Connection connection, Integer transactionTimeout)
       throws SQLException;
 
+  //todo  绑定statement执行时所需的实参
   void parameterize(Statement statement)
       throws SQLException;
 
+  //todo  批量执行SQL语句
   void batch(Statement statement)
       throws SQLException;
 
+  //todo  执行update /insert /delete语句
   int update(Statement statement)
       throws SQLException;
 
+  //todo  执行select语句
   <E> List<E> query(Statement statement, ResultHandler resultHandler)
       throws SQLException;
 
@@ -50,6 +56,7 @@ public interface StatementHandler {
 
   BoundSql getBoundSql();
 
+  //todo  获取其中封装的 ParameterHandler
   ParameterHandler getParameterHandler();
 
 }

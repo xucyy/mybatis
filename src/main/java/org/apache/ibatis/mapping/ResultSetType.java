@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 
 /**
  * @author Clinton Begin
+ * todo 表示结果集类型
  */
 public enum ResultSetType {
   /**

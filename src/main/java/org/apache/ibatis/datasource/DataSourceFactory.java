@@ -20,11 +20,14 @@ import javax.sql.DataSource;
 
 /**
  * @author Clinton Begin
+ * todo  工厂接口，工厂都实现这个接口
  */
 public interface DataSourceFactory {
 
+  //todo 设置Datasource的相关属性，一般紧跟在初始化完成之后
   void setProperties(Properties props);
 
+  //todo 获取datasource对象
   DataSource getDataSource();
 
 }

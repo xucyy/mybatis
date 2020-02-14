@@ -35,27 +35,34 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
   protected DataSource dataSource;
 
   public UnpooledDataSourceFactory() {
+    //todo  创建 UnpooledDataSource并初始化 datasource字段
     this.dataSource = new UnpooledDataSource();
   }
 
   @Override
   public void setProperties(Properties properties) {
     Properties driverProperties = new Properties();
+    //todo 创建DataSource相应的MetaObject
     MetaObject metaDataSource = SystemMetaObject.forObject(dataSource);
+    //todo 遍历properties集合，该集合中配置了关于数据源的信息
     for (Object key : properties.keySet()) {
       String propertyName = (String) key;
       if (propertyName.startsWith(DRIVER_PROPERTY_PREFIX)) {
         String value = properties.getProperty(propertyName);
+        //todo 以"driver."开头的配置项是对DataSource的配置，记录到driverProperties中保存
         driverProperties.setProperty(propertyName.substring(DRIVER_PROPERTY_PREFIX_LENGTH), value);
-      } else if (metaDataSource.hasSetter(propertyName)) {
+      } else if (metaDataSource.hasSetter(propertyName)) {//todo 是否有该属性的setter方法
         String value = (String) properties.get(propertyName);
+        //todo 根据属性类型进行类型转换，主要是Integer,Long ,Boolean三种类型的转换
         Object convertedValue = convertValue(metaDataSource, propertyName, value);
+        //todo 设置DataSource的相关属性值
         metaDataSource.setValue(propertyName, convertedValue);
       } else {
         throw new DataSourceException("Unknown DataSource property: " + propertyName);
       }
     }
     if (driverProperties.size() > 0) {
+      //todo 设置DataSource.driverProperties属性值
       metaDataSource.setValue("driverProperties", driverProperties);
     }
   }

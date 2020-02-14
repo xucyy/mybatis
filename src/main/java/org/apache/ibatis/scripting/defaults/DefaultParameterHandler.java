@@ -35,13 +35,17 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * todo ParameterHandler的唯一实现类，用于为带有"？"的参数 绑定参数
  */
 public class DefaultParameterHandler implements ParameterHandler {
-
+  //todo TypeHandlerRegistry对象，管理mybatis中的所有TypeHandler
   private final TypeHandlerRegistry typeHandlerRegistry;
 
+  //todo 记录SQL节点的信息
   private final MappedStatement mappedStatement;
+  //todo 用户传入的实参对象
   private final Object parameterObject;
+  //todo 对应的BoundSQL对象，需要设置参数的PreparedStatement对象，就是根据该BoundSql中记录的SQL语句创建的，BoundSql中也记录了对应参数的名称和相关参数
   private final BoundSql boundSql;
   private final Configuration configuration;
 
@@ -61,29 +65,39 @@ public class DefaultParameterHandler implements ParameterHandler {
   @Override
   public void setParameters(PreparedStatement ps) {
     ErrorContext.instance().activity("setting parameters").object(mappedStatement.getParameterMap().getId());
+    //todo 获取到sql的参数集合
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings != null) {
+      //todo 遍历参数集合
       for (int i = 0; i < parameterMappings.size(); i++) {
         ParameterMapping parameterMapping = parameterMappings.get(i);
+        //todo 过滤掉存储过程中的输出参数
         if (parameterMapping.getMode() != ParameterMode.OUT) {
           Object value;
+          //todo 获取参数名称
           String propertyName = parameterMapping.getProperty();
+          //todo 获取对应的实参值
           if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
             value = boundSql.getAdditionalParameter(propertyName);
           } else if (parameterObject == null) {
+            //todo 整个实参为空
             value = null;
           } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+            //todo 实参可以直接通过TypeHandler转换成JdbcType
             value = parameterObject;
           } else {
+            //todo 获取对象中相应的属性值或查找Map对象的值
             MetaObject metaObject = configuration.newMetaObject(parameterObject);
             value = metaObject.getValue(propertyName);
           }
+          //todo 获取ParameterMapping中设置的TypeHandler对象
           TypeHandler typeHandler = parameterMapping.getTypeHandler();
           JdbcType jdbcType = parameterMapping.getJdbcType();
           if (value == null && jdbcType == null) {
             jdbcType = configuration.getJdbcTypeForNull();
           }
           try {
+            //todo 为SQL语句绑定相应的实参
             typeHandler.setParameter(ps, i + 1, value, jdbcType);
           } catch (TypeException | SQLException e) {
             throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);

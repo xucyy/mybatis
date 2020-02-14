@@ -37,6 +37,7 @@ import org.apache.ibatis.type.JdbcType;
 
 /**
  * @author Clinton Begin
+ * todo 底层依赖的是CallableStatement 调用指定的存储过程
  */
 public class CallableStatementHandler extends BaseStatementHandler {
 
@@ -90,6 +91,7 @@ public class CallableStatementHandler extends BaseStatementHandler {
     }
   }
 
+  //todo 调用ParameterHandler.setParameters 完成sql语句的参数绑定，并指定输出参数的索引位置以及JDBC类型
   @Override
   public void parameterize(Statement statement) throws SQLException {
     registerOutputParameters((CallableStatement) statement);

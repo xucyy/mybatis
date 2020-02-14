@@ -41,12 +41,14 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
 
   private Properties properties;
 
+  //todo  在接收到DataSource之后
   @Override
   public String getDatabaseId(DataSource dataSource) {
     if (dataSource == null) {
       throw new NullPointerException("dataSource cannot be null");
     }
     try {
+      //todo 开始根据<databaseId>配置的property 来确定数据库产品和databaseId的对应关系 确定最终的databaseId
       return getDatabaseName(dataSource);
     } catch (Exception e) {
       LogHolder.log.error("Could not get a databaseId from dataSource", e);
@@ -60,10 +62,13 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
   }
 
   private String getDatabaseName(DataSource dataSource) throws SQLException {
+    //todo 解析DataSource连接的数据库产品的名称
     String productName = getDatabaseProductName(dataSource);
+    //todo 根据在DatabaseIdProvider标签下配置的Property来确定最终的databaseId
     if (this.properties != null) {
       for (Map.Entry<Object, Object> property : properties.entrySet()) {
         if (productName.contains((String) property.getKey())) {
+          //todo 确定最终的databaseId
           return (String) property.getValue();
         }
       }
@@ -73,6 +78,7 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
     return productName;
   }
 
+  //todo 根据dataSource来确定 对应的数据库类型
   private String getDatabaseProductName(DataSource dataSource) throws SQLException {
     try (Connection con = dataSource.getConnection()) {
       DatabaseMetaData metaData = con.getMetaData();

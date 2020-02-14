@@ -27,11 +27,15 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Clinton Begin
+ * todo mybatis提供的Plugin工具类，实现了InvocationHandler
  */
 public class Plugin implements InvocationHandler {
 
+  //todo 目标对象
   private final Object target;
+  //todo Interceptor对象
   private final Interceptor interceptor;
+  //todo 记录了@SignatureMap注解中的信息
   private final Map<Class<?>, Set<Method>> signatureMap;
 
   private Plugin(Object target, Interceptor interceptor, Map<Class<?>, Set<Method>> signatureMap) {
@@ -41,10 +45,14 @@ public class Plugin implements InvocationHandler {
   }
 
   public static Object wrap(Object target, Interceptor interceptor) {
+    //TODO 得到插件类上的Interceptor注解中的signatureTypes的值，也就是拦截啥 比如query update
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
+    //todo 获取目标类型
     Class<?> type = target.getClass();
+    //todo 获取目标实现的接口
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
     if (interfaces.length > 0) {
+      //TODO  使用代理模式生成代理类
       return Proxy.newProxyInstance(
           type.getClassLoader(),
           interfaces,
@@ -53,13 +61,17 @@ public class Plugin implements InvocationHandler {
     return target;
   }
 
+  //TODO  InvocationHandler动态代理的invoke方法
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+      //todo 将当前调用的方法与 signatureMap中调用的方法信息做比较
       Set<Method> methods = signatureMap.get(method.getDeclaringClass());
       if (methods != null && methods.contains(method)) {
+        //todo 如果调用的方法是需要被拦截的方法，则调用其拦截器的intercept()方法进行处理
         return interceptor.intercept(new Invocation(target, method, args));
       }
+      //todo 不需要拦截，则直接调用target的相应方法
       return method.invoke(target, args);
     } catch (Exception e) {
       throw ExceptionUtil.unwrapThrowable(e);

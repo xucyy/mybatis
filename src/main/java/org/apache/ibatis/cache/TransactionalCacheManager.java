@@ -22,9 +22,11 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
 
 /**
  * @author Clinton Begin
+ * todo 是CachingExecutor依赖的组件，是用于管理CachingExecutor使用的二级缓存对象
  */
 public class TransactionalCacheManager {
-
+  //todo 他的key是对应的CachingExecutor使用的二级缓存对象,value是相应的TransactionalCache对象，在该
+  //  TransactionalCache中封装了对应的二级缓存对象，也就是这里的key
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {

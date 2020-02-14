@@ -31,16 +31,22 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Larry Meadors
+ * todo  同时实现了 SqlSession接口和SqlSessionFactory接口，也就是同时提供了SqlSessionFactory常见SqlSession的功能以及SqlSession操纵数据库的功能
+ *   提供两种模式，一种是同一个线程每次通过SqlSessionManager对象访问数据库时，都会创建新的DefaultSession对象完成数据库操作
+ *      第二种模式是SqlSessionManager通过localSqlSession这个ThreadLoacl变量，记录与当前线程绑定的SqlSession对象，供当前线程使用，从而避免在同一线程多次创建
  */
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   private final SqlSessionFactory sqlSessionFactory;
+  //todo 生成的SqlSession的代理对象
   private final SqlSession sqlSessionProxy;
 
   private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
 
+  //todo 私有构造方法
   private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;
+    //todo 使用动态代理的方式，生成SqlSession的代理对象
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
         SqlSessionFactory.class.getClassLoader(),
         new Class[]{SqlSession.class},
@@ -337,6 +343,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
     }
   }
 
+  //todo SqlSession的代理对象
   private class SqlSessionInterceptor implements InvocationHandler {
     public SqlSessionInterceptor() {
         // Prevent Synthetic Access
@@ -344,20 +351,26 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      //todo 获取当前线程绑定的SqlSession对象
       final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get();
       if (sqlSession != null) {
+        //todo 调用真正的SqlSession对象，完成数据库操作
         try {
           return method.invoke(sqlSession, args);
         } catch (Throwable t) {
           throw ExceptionUtil.unwrapThrowable(t);
         }
       } else {
+        //todo 如果该线程还没有绑定SqlSession对象，则创建新的SqlSession对象，用完之后会立即关闭先创建的SqlSession对象，利用了 try resource
         try (SqlSession autoSqlSession = openSession()) {
           try {
+            //todo 通过新建的SqlSession对象完成数据库操作
             final Object result = method.invoke(autoSqlSession, args);
+            //todo 提交事务
             autoSqlSession.commit();
             return result;
           } catch (Throwable t) {
+            //todo 回滚事务
             autoSqlSession.rollback();
             throw ExceptionUtil.unwrapThrowable(t);
           }

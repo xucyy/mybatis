@@ -35,19 +35,27 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * todo 作为一个基类，它只提供了一些参数绑定相关的方法，并没有实现操作数据库的方法
  */
 public abstract class BaseStatementHandler implements StatementHandler {
 
   protected final Configuration configuration;
   protected final ObjectFactory objectFactory;
   protected final TypeHandlerRegistry typeHandlerRegistry;
+  //todo 记录使用的ResultSetHandler对象，他的主要功能是将结果映射成结果对象
   protected final ResultSetHandler resultSetHandler;
+  //todo 记录使用的ParameterHandler对象，ParameterHandler的主要功能是为SQL语句绑定实参，也就是使用
+  //  传入的实参替换SQL语句的"?"占位符
   protected final ParameterHandler parameterHandler;
 
+  //todo 记录执行sql语句的执行期
   protected final Executor executor;
+  //todo 记录SQL节点对应的MappedStatement
   protected final MappedStatement mappedStatement;
+  //todo rowBounds记录了用户设置的offset和limit，用于在结果集中定位映射的起始位置和结束位置
   protected final RowBounds rowBounds;
 
+  //todo 记录SQL
   protected BoundSql boundSql;
 
   protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
@@ -60,6 +68,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.objectFactory = configuration.getObjectFactory();
 
     if (boundSql == null) { // issue #435, get the key before calculating the statement
+      //todo 还会调用KeyGenerator.processBefore方法初始化SQL语句的主键
       generateKeys(parameterObject);
       boundSql = mappedStatement.getBoundSql(parameterObject);
     }
@@ -85,8 +94,11 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
+      //todo 初始化java.sql.statement对象
       statement = instantiateStatement(connection);
+      //todo 给对象设置超时时间timeout
       setStatementTimeout(statement, transactionTimeout);
+      //todo 给statement对象设置fetchSize
       setFetchSize(statement);
       return statement;
     } catch (SQLException e) {

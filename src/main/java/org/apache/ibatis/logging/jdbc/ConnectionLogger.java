@@ -27,7 +27,8 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * Connection proxy to add logging.
- *
+ * todo  继承 BaseJdbcLogger，其中封装了Connection对象并同时实现了InvocationHandler接口
+ *   会为其封装的Connection对象创建相应的代理对象
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
@@ -41,6 +42,7 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
     this.connection = conn;
   }
 
+  //todo 它为prepareStatement() , prepareCall(),createStatement() 等方法提供代理
   @Override
   public Object invoke(Object proxy, Method method, Object[] params)
       throws Throwable {
@@ -76,11 +78,12 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
 
   /**
    * Creates a logging version of a connection.
-   *
+   * todo 创建一个connection代理对象
    * @param conn - the original connection
    * @return - the connection with logging
    */
   public static Connection newInstance(Connection conn, Log statementLog, int queryStack) {
+    //todo 使用Jdk的动态代理的方式创建代理对象
     InvocationHandler handler = new ConnectionLogger(conn, statementLog, queryStack);
     ClassLoader cl = Connection.class.getClassLoader();
     return (Connection) Proxy.newProxyInstance(cl, new Class[]{Connection.class}, handler);

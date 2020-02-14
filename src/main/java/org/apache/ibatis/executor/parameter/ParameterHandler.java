@@ -20,13 +20,14 @@ import java.sql.SQLException;
 
 /**
  * A parameter handler sets the parameters of the {@code PreparedStatement}.
- *
+ * todo 为sql语句绑定参数
  * @author Clinton Begin
  */
 public interface ParameterHandler {
 
   Object getParameterObject();
 
+  //todo 该方法主要负责调用PreparedStatement.set*方法为SQL语句绑定参数
   void setParameters(PreparedStatement ps)
       throws SQLException;
 

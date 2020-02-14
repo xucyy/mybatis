@@ -26,9 +26,11 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ * todo
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
+  //todo 利用 map 暂存数据
   private final Map<K, V> mappedResults;
   private final String mapKey;
   private final ObjectFactory objectFactory;

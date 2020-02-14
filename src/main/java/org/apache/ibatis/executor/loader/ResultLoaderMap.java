@@ -46,10 +46,11 @@ import org.apache.ibatis.session.RowBounds;
  * @author Franta Mejta
  */
 public class ResultLoaderMap {
-
+  //todo  用于保存对象中的延迟加载属性及其对应的ResultLoader对象之间的关系
   private final Map<String, LoadPair> loaderMap = new HashMap<>();
 
   public void addLoader(String property, MetaObject metaResultObject, ResultLoader resultLoader) {
+    //todo loaderMap的key是转换为大写的属性名称  value是 LoadPair对象
     String upperFirst = getUppercaseFirstProperty(property);
     if (!upperFirst.equalsIgnoreCase(property) && loaderMap.containsKey(upperFirst)) {
       throw new ExecutorException("Nested lazy loaded result property '" + property
@@ -75,6 +76,7 @@ public class ResultLoaderMap {
     return loaderMap.containsKey(property.toUpperCase(Locale.ENGLISH));
   }
 
+  //todo 执行延迟加载，负责加载指定名称的属性
   public boolean load(String property) throws SQLException {
     LoadPair pair = loaderMap.remove(property.toUpperCase(Locale.ENGLISH));
     if (pair != null) {
@@ -88,6 +90,7 @@ public class ResultLoaderMap {
     loaderMap.remove(property.toUpperCase(Locale.ENGLISH));
   }
 
+  //todo 执行延迟加载，加载该对象中全部的延迟加载属性
   public void loadAll() throws SQLException {
     final Set<String> methodNameSet = loaderMap.keySet();
     String[] methodNames = methodNameSet.toArray(new String[methodNameSet.size()]);
@@ -103,6 +106,7 @@ public class ResultLoaderMap {
 
   /**
    * Property which was not loaded yet.
+   * todo
    */
   public static class LoadPair implements Serializable {
 
@@ -117,10 +121,12 @@ public class ResultLoaderMap {
     private final transient Object serializationCheck = new Object();
     /**
      * Meta object which sets loaded properties.
+     * todo 外层对象 对应的MetaObject对象
      */
     private transient MetaObject metaResultObject;
     /**
      * Result loader which loads unread properties.
+     * todo 负责加载延迟加载属性的ResultLoader对象
      */
     private transient ResultLoader resultLoader;
     /**
@@ -133,10 +139,12 @@ public class ResultLoaderMap {
     private Class<?> configurationFactory;
     /**
      * Name of the unread property.
+     * todo 延迟加载的属性名称
      */
     private String property;
     /**
      * ID of SQL statement which loads the property.
+     * todo 用于加载属性的SQL语句的ID
      */
     private String mappedStatement;
     /**
@@ -170,7 +178,7 @@ public class ResultLoaderMap {
         }
       }
     }
-
+    //todo 执行延迟加载
     public void load() throws SQLException {
       /* These field should not be null unless the loadpair was serialized.
        * Yet in that case this method should not be called. */
@@ -202,6 +210,7 @@ public class ResultLoaderMap {
         }
 
         this.metaResultObject = config.newMetaObject(userObject);
+        //todo 得到最终的resultLoader对象
         this.resultLoader = new ResultLoader(config, new ClosedExecutor(), ms, this.mappedParameter,
                 metaResultObject.getSetterType(this.property), null, null);
       }
@@ -216,6 +225,7 @@ public class ResultLoaderMap {
                 old.parameterObject, old.targetType, old.cacheKey, old.boundSql);
       }
 
+      //todo 调用ResultLoader.laodResult()方法执行延迟加载，并将加载得到的嵌套对象设置到外层对象中
       this.metaResultObject.setValue(property, this.resultLoader.loadResult());
     }
 

@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  *  initialize();
  * }
  * </pre>
- *
+ * todo 缓存模块的最核心接口，他定义了所有缓存的基本行为
  * @author Clinton Begin
  */
 
@@ -43,18 +43,21 @@ public interface Cache {
 
   /**
    * @return The identifier of this cache
+   * todo 该缓存对象的id
    */
   String getId();
 
   /**
    * @param key Can be any object but usually it is a {@link CacheKey}
    * @param value The result of a select.
+   * todo 向缓存中添加数据，一般情况下，key是CacheKey,value是查询结果
    */
   void putObject(Object key, Object value);
 
   /**
    * @param key The key
    * @return The object stored in the cache.
+   * todo 根据指定的key，在缓存中查找对应的结果对象
    */
   Object getObject(Object key);
 
@@ -68,7 +71,7 @@ public interface Cache {
    * This way other threads will wait for the value to be
    * available instead of hitting the database.
    *
-   *
+   * todo 删除key对应的缓存项
    * @param key The key
    * @return Not used
    */
@@ -76,6 +79,7 @@ public interface Cache {
 
   /**
    * Clears this cache instance.
+   * todo 清空缓存
    */
   void clear();
 

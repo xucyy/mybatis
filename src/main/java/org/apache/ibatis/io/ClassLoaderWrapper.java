@@ -20,16 +20,23 @@ import java.net.URL;
 
 /**
  * A class to wrap access to multiple class loaders making them work as one
- *
+ * todo  是一个对ClassLoader的包装器，其中包含了多个ClassLoader对象
+ *    mybatis提供的ClassLoaderWrapper是一个ClassLoader的包装器，其中包含了多个ClassLoader对象。
+ *    通过调整多个类加载器的使用顺序，ClassLoaderWrapper可以确保返回给系统使用的是正确的类加载器。
+ *    使用ClassLoaderWrapper就如同使用一个ClassLoader对象，
+ *    ClassLoaderWrapper会按照指定的顺序依次检测其中封装的ClassLoader对象，并从中选取一个可用的ClassLoader完成相关功能。
  * @author Clinton Begin
  */
 public class ClassLoaderWrapper {
 
+  //todo  应用指定的默认类加载器
   ClassLoader defaultClassLoader;
+  //todo systemClassLoader
   ClassLoader systemClassLoader;
 
   ClassLoaderWrapper() {
     try {
+      //todo 初始化 systemClassLoader字段
       systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (SecurityException ignored) {
       // AccessControlException on Google App Engine
@@ -138,23 +145,25 @@ public class ClassLoaderWrapper {
   URL getResourceAsURL(String resource, ClassLoader[] classLoader) {
 
     URL url;
-
+    //todo 遍历ClassLoader数组
     for (ClassLoader cl : classLoader) {
 
       if (null != cl) {
 
-        // look for the resource as passed in...
+        // todo 调用ClassLoader.getResource方法查找指定的资源
         url = cl.getResource(resource);
 
         // ...but some class loaders want this leading "/", so we'll add it
         // and try again if we didn't find the resource
         if (null == url) {
+          //todo 尝试以 /开头，再次查找
           url = cl.getResource("/" + resource);
         }
 
         // "It's always in the last place I look for it!"
         // ... because only an idiot would keep looking for it after finding it, so stop looking already.
         if (null != url) {
+          //todo 找到指定的资源
           return url;
         }
 
@@ -201,13 +210,15 @@ public class ClassLoaderWrapper {
 
   }
 
+  //todo 会返回ClassLoader[]数组，该数组指明了类加载器的使用顺序
   ClassLoader[] getClassLoaders(ClassLoader classLoader) {
     return new ClassLoader[]{
-        classLoader,
-        defaultClassLoader,
-        Thread.currentThread().getContextClassLoader(),
-        getClass().getClassLoader(),
-        systemClassLoader};
+        classLoader,//参数指定的类加载器
+        defaultClassLoader,//系统指定的默认类加载器
+        Thread.currentThread().getContextClassLoader(),//当前线程绑定的类加载器
+        getClass().getClassLoader(),//加载当前类所使用的类加载器
+        systemClassLoader//系统类加载器
+    };
   }
 
 }

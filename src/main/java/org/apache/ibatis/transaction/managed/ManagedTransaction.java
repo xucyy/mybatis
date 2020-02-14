@@ -31,7 +31,7 @@ import org.apache.ibatis.transaction.Transaction;
  * By default, it closes the connection but can be configured not to do it.
  *
  * @author Clinton Begin
- *
+ * todo 依赖与 DataSource来获取连接，但是其commit().rollback()都是空实现，事务的提交和回滚都依靠容器管理
  * @see ManagedTransactionFactory
  */
 public class ManagedTransaction implements Transaction {
@@ -41,6 +41,7 @@ public class ManagedTransaction implements Transaction {
   private DataSource dataSource;
   private TransactionIsolationLevel level;
   private Connection connection;
+  //todo 通过该字段的值来控制数据库连接的关闭行为
   private final boolean closeConnection;
 
   public ManagedTransaction(Connection connection, boolean closeConnection) {

@@ -33,6 +33,7 @@ import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 
 /**
  * @author Clinton Begin
+ * todo 用于创建SqlSession  提供了多种重载方法，用于实现不同种类的SqlSession
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
@@ -47,16 +48,19 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
   }
 
+  //todo  是否自动提交
   @Override
   public SqlSession openSession(boolean autoCommit) {
     return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, autoCommit);
   }
 
+  //todo 确认 Executor的类型
   @Override
   public SqlSession openSession(ExecutorType execType) {
     return openSessionFromDataSource(execType, null, false);
   }
 
+  //todo  隔离级别
   @Override
   public SqlSession openSession(TransactionIsolationLevel level) {
     return openSessionFromDataSource(configuration.getDefaultExecutorType(), level, false);
@@ -87,13 +91,19 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     return configuration;
   }
 
+  //todo  通过数据源获取数据库连接，并创建Executor对象以及DefaultSqlSession对象
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
     Transaction tx = null;
     try {
+      //todo  获取mybatis-config.xml配置文件中配置的Environment
       final Environment environment = configuration.getEnvironment();
+      //todo 获取TransactionFactory对象
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+      //todo 创建Transaction对象
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      //todo 根据配置创建Executor,默认是SimpleExecutor
       final Executor executor = configuration.newExecutor(tx, execType);
+      //todo 然后创建DefaultSqlSession对象
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()
@@ -102,7 +112,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
       ErrorContext.instance().reset();
     }
   }
-
+  //todo 通过数据库连接来创建Executor对象以及DefaultSqlSession
   private SqlSession openSessionFromConnection(ExecutorType execType, Connection connection) {
     try {
       boolean autoCommit;

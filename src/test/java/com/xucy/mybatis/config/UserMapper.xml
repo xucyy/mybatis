@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xucy.mybatis.dao.UserMapper">
+  <resultMap id="firstResult" type="com.xucy.mybatis.entity.User">
+    <result property="age" column="age" jdbcType="VARCHAR"/>
+  </resultMap>
+  <!--设置缓存策略-->
+  <!--<cache eviction="LRU" type="xxx具体实现类"></cache>-->
+  <select id="selectUser" resultType="com.xucy.mybatis.entity.User"  >
+     select * from user where id = #{id}
+  </select>
+
+  <insert id="insert">
+    INSERT INTO user ( name, age, address) VALUES ( '孤傲复制22', 24, '上海')
+  </insert>
+</mapper>

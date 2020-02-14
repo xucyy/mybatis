@@ -23,6 +23,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * todo 虽然实现了keyGenerator接口，但是他的 processBefore和 processAfter都是空实现
  */
 public class NoKeyGenerator implements KeyGenerator {
 

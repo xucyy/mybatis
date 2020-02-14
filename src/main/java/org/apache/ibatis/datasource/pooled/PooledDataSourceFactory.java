@@ -19,6 +19,7 @@ import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 
 /**
  * @author Clinton Begin
+ * todo 继承于 UnPooledDataSourceFactory 只是构造方法中创建得是 PooledDataSource
  */
 public class PooledDataSourceFactory extends UnpooledDataSourceFactory {
 

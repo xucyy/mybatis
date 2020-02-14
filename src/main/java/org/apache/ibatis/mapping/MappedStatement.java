@@ -30,9 +30,14 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo 封装了SQL语句的信息 也就是 会包含这个<select id="" name="" resultMap=""></select> 这里面的信息，而sql语句是
+ *  存在SqlSource中的
+ *  表示映射配置文件中定义的SQL节点
+ *   Statement=声明 说法，也就是mapped声明
  */
 public final class MappedStatement {
 
+  //todo 节点中的id属性
   private String resource;
   private Configuration configuration;
   private String id;
@@ -40,13 +45,16 @@ public final class MappedStatement {
   private Integer timeout;
   private StatementType statementType;
   private ResultSetType resultSetType;
+  //todo SqlSource对象，对应一条SQL语句
   private SqlSource sqlSource;
   private Cache cache;
   private ParameterMap parameterMap;
+  //todo mapper配置文件中 配置的<resultMap>节点解析后存储的地方
   private List<ResultMap> resultMaps;
   private boolean flushCacheRequired;
   private boolean useCache;
   private boolean resultOrdered;
+  //todo SQL的类型，Insert,Select等
   private SqlCommandType sqlCommandType;
   private KeyGenerator keyGenerator;
   private String[] keyProperties;

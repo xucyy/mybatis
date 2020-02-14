@@ -37,24 +37,34 @@ import org.apache.ibatis.type.UnknownTypeHandler;
 
 /**
  * @author Iwao AVE!
+ * todo 封装了结果集 ResultSet，记录了ResultSet中的一些元数据，并且提供了一系列操作ResultSet的辅助方法
  */
 public class ResultSetWrapper {
-
+  //todo 底层封装的 ResultSet
   private final ResultSet resultSet;
   private final TypeHandlerRegistry typeHandlerRegistry;
+  //todo 记录ResultSet中每列的列名
   private final List<String> columnNames = new ArrayList<>();
+  //todo 记录ResultSet中每列对应的Java类型
   private final List<String> classNames = new ArrayList<>();
+  //todo 记录ResultSet中每列对应的JdbcType类型
   private final List<JdbcType> jdbcTypes = new ArrayList<>();
+  //todo 记录了每列对应的TypeHandler对象，key是列名，value是TypeHandler集合
   private final Map<String, Map<Class<?>, TypeHandler<?>>> typeHandlerMap = new HashMap<>();
+  //todo 记录了被映射的列名，其中key是ResultMap对象的id,value是该ResultMap对象映射的列名集合
   private final Map<String, List<String>> mappedColumnNamesMap = new HashMap<>();
+  //todo 记录了未被映射的列名，其中key是ResultMap对象的id,value是该ResultMap对像未映射的列名集合
   private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
 
   public ResultSetWrapper(ResultSet rs, Configuration configuration) throws SQLException {
     super();
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.resultSet = rs;
+    //todo 获取ResultSet的元信息
     final ResultSetMetaData metaData = rs.getMetaData();
+    //todo ResultSet中的列数
     final int columnCount = metaData.getColumnCount();
+    //todo 初始化columnNames，jdbcTypes，classNames
     for (int i = 1; i <= columnCount; i++) {
       columnNames.add(configuration.isUseColumnLabel() ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
       jdbcTypes.add(JdbcType.forCode(metaData.getColumnType(i)));
@@ -140,23 +150,29 @@ public class ResultSetWrapper {
     }
     return null;
   }
-
+  //todo
   private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
+    //todo mappedColumnNames和unMappedColumnNames分别记录ResultMap中映射的列名和未映射的列名
     List<String> mappedColumnNames = new ArrayList<>();
     List<String> unmappedColumnNames = new ArrayList<>();
+    //todo resultMap中定义的列名加上前缀，得到实际映射的列名
     final String upperColumnPrefix = columnPrefix == null ? null : columnPrefix.toUpperCase(Locale.ENGLISH);
     final Set<String> mappedColumns = prependPrefixes(resultMap.getMappedColumns(), upperColumnPrefix);
     for (String columnName : columnNames) {
       final String upperColumnName = columnName.toUpperCase(Locale.ENGLISH);
       if (mappedColumns.contains(upperColumnName)) {
-        mappedColumnNames.add(upperColumnName);
+        mappedColumnNames.add(upperColumnName);//todo 记录映射列名
       } else {
-        unmappedColumnNames.add(columnName);
+        unmappedColumnNames.add(columnName);//todo 记录未映射列面
       }
     }
+    //todo 将ResultMap的Id和前缀组成key，将ResultMap映射的列名及未映射的列名保存到
+    // mappedColumnNamesMap 和unMappedColumnNamesMap中
     mappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), mappedColumnNames);
     unMappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), unmappedColumnNames);
   }
+
+  //todo 返回指定ResultMap对象中明确映射的列名集合，同时会将该列名集合记录到mappedColumnNamesMap
 
   public List<String> getMappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
     List<String> mappedColumnNames = mappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
@@ -166,7 +182,7 @@ public class ResultSetWrapper {
     }
     return mappedColumnNames;
   }
-
+  //todo 返回指定ResultMap对象中明确映射的列名集合，同时会将未映射的列名集合记录到unMappedColumnNamesMap
   public List<String> getUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
     List<String> unMappedColumnNames = unMappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
     if (unMappedColumnNames == null) {

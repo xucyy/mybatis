@@ -36,21 +36,29 @@ import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
  * @author Clinton Begin
+ * todo 主要负责保存一次延迟加载操作所需的全部信息
  */
 public class ResultLoader {
 
   protected final Configuration configuration;
   protected final Executor executor;
+  //todo 记录延迟加载的SQL节点信息
   protected final MappedStatement mappedStatement;
+  //todo 记录延迟加载的SQL语句 实参
   protected final Object parameterObject;
+  //todo 记录了延迟加载得到的对象类型
   protected final Class<?> targetType;
   protected final ObjectFactory objectFactory;
   protected final CacheKey cacheKey;
+  //todo 记录了延迟执行的SQL语句
   protected final BoundSql boundSql;
+  //todo 负责将延迟加载得到的结果对象转换成targetType类型的对象
   protected final ResultExtractor resultExtractor;
+  //todo 创建ResultLoader的线程id
   protected final long creatorThreadId;
 
   protected boolean loaded;
+  //todo 记录加载得到的结果集
   protected Object resultObject;
 
   public ResultLoader(Configuration config, Executor executor, MappedStatement mappedStatement, Object parameterObject, Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
@@ -65,21 +73,27 @@ public class ResultLoader {
     this.resultExtractor = new ResultExtractor(configuration, objectFactory);
     this.creatorThreadId = Thread.currentThread().getId();
   }
-
+  //todo  该方法会通过executor执行resultLoader中记录的SQL语句并返回相应的延迟加载对象
   public Object loadResult() throws SQLException {
+    //todo 执行延迟加载，得到结果对象，并以list的形式返回
     List<Object> list = selectList();
+    //todo 将list集合转换成targetType指定类型的对象
     resultObject = resultExtractor.extractObjectFromList(list, targetType);
     return resultObject;
   }
-
+  //todo 具体完成延迟加载操作的地方
   private <E> List<E> selectList() throws SQLException {
+    //todo 记录执行延迟加载的executor对象
     Executor localExecutor = executor;
+    //todo 检测调用该方法的线程是否为创建 ResultLoader对象的线程，检测localExecutor是否关闭，如果 为是 ，则创建新的executor来执行延迟加载
     if (Thread.currentThread().getId() != this.creatorThreadId || localExecutor.isClosed()) {
       localExecutor = newExecutor();
     }
     try {
+      //todo 执行查询操作，得到延迟加载的对象
       return localExecutor.query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER, cacheKey, boundSql);
     } finally {
+      //todo 如果是新的executor，则需要关闭
       if (localExecutor != executor) {
         localExecutor.close(false);
       }

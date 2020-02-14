@@ -34,21 +34,28 @@ import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
  * Base class for proxies to do logging.
- *
+ * todo 是一个抽象类，他是jdbc包下其他的Logger类的父类
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public abstract class BaseJdbcLogger {
 
+  //todo 记录了PreparedStatement接口中定义的常用的set*()方法
   protected static final Set<String> SET_METHODS;
+  //todo 记录了Statement接口和PreparedStatement接口中与执行SQL语句相关的方法
   protected static final Set<String> EXECUTE_METHODS = new HashSet<>();
 
+  //todo 记录了PreparedStatement set*() 方法设置的键值对
   private final Map<Object, Object> columnMap = new HashMap<>();
 
+  //todo 记录了PreparedStatement.set*() 方法设置的key值
   private final List<Object> columnNames = new ArrayList<>();
+  //todo 记录了PreparedStatement.set*() 方法设置的value值
   private final List<Object> columnValues = new ArrayList<>();
 
+  //todo 用于输出日志的Log对象
   protected final Log statementLog;
+  //todo 记录了SQL的层数，用于格式化输出SQL
   protected final int queryStack;
 
   /*
@@ -64,6 +71,7 @@ public abstract class BaseJdbcLogger {
   }
 
   static {
+    //todo 出PreparedStatement中查出set的方法 放入到Set_methods中
     SET_METHODS = Arrays.stream(PreparedStatement.class.getDeclaredMethods())
             .filter(method -> method.getName().startsWith("set"))
             .filter(method -> method.getParameterCount() > 1)

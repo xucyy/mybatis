@@ -27,11 +27,12 @@ import java.util.Properties;
 
 /**
  * A class to simplify access to resources through the classloader.
- *
+ * todo 提供了多个静态方法的工具类，它里面的方法基本上都是调用他的ClassLoaderWrapper成员变量来实现
  * @author Clinton Begin
  */
 public class Resources {
 
+  //todo 封装了一个ClassLoaderWrapper类型的静态字段
   private static ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper();
 
   /**

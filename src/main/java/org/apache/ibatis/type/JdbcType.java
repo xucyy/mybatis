@@ -21,6 +21,7 @@ import java.util.Map;
 
 /**
  * @author Clinton Begin
+ * todo 这个枚举，代表得是JDBC中的数据类型
  */
 public enum JdbcType {
   /*
@@ -69,7 +70,9 @@ public enum JdbcType {
   TIME_WITH_TIMEZONE(Types.TIME_WITH_TIMEZONE), // JDBC 4.2 JDK8
   TIMESTAMP_WITH_TIMEZONE(Types.TIMESTAMP_WITH_TIMEZONE); // JDBC 4.2 JDK8
 
+  //todo 这个字段记录了JDBC在 java.sql.Types中相应的常量编码
   public final int TYPE_CODE;
+  //todo 通过静态集合 codeLookup维护了常量编码与JdbcType之间的对应关系
   private static Map<Integer,JdbcType> codeLookup = new HashMap<>();
 
   static {

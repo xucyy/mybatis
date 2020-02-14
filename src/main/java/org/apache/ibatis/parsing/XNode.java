@@ -29,17 +29,25 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author Clinton Begin
+ * todo 他是对 org.w3c.Node做了分装
  */
 public class XNode {
 
+  //todo org.w3c.com.Node对象
   private final Node node;
+  //todo node 节点名称
   private final String name;
+  //todo 节点的内容
   private final String body;
+  //todo 节点的属性集合
   private final Properties attributes;
+  //todo mybatis-config.xml配置文件中<properties>节点下定义的键值对
   private final Properties variables;
+  //todo 由xpathParser对象生成
   private final XPathParser xpathParser;
 
   public XNode(XPathParser xpathParser, Node node, Properties variables) {
+    //todo 初始化属性
     this.xpathParser = xpathParser;
     this.node = node;
     this.name = node.getNodeName();
@@ -377,23 +385,27 @@ public class XNode {
       builder.append("    ");
     }
   }
-
+  //todo 初始化节点的属性
   private Properties parseAttributes(Node n) {
     Properties attributes = new Properties();
+    //todo 获得节点的属性集合
     NamedNodeMap attributeNodes = n.getAttributes();
     if (attributeNodes != null) {
       for (int i = 0; i < attributeNodes.getLength(); i++) {
         Node attribute = attributeNodes.item(i);
+        //todo 使用PropertyParser处理每个属性中的占位符
         String value = PropertyParser.parse(attribute.getNodeValue(), variables);
         attributes.put(attribute.getNodeName(), value);
       }
     }
     return attributes;
   }
-
+  //todo 初始化节点的内容
   private String parseBody(Node node) {
     String data = getBodyData(node);
+    //todo 判断节点是不是文本节点
     if (data == null) {
+      //todo 处理子节点
       NodeList children = node.getChildNodes();
       for (int i = 0; i < children.getLength(); i++) {
         Node child = children.item(i);
@@ -409,7 +421,9 @@ public class XNode {
   private String getBodyData(Node child) {
     if (child.getNodeType() == Node.CDATA_SECTION_NODE
         || child.getNodeType() == Node.TEXT_NODE) {
+      //todo 判断是不是文本节点，只处理文本节点
       String data = ((CharacterData) child).getData();
+      //todo 使用PropertyParser 处理文本节点中的占位符
       data = PropertyParser.parse(data, variables);
       return data;
     }

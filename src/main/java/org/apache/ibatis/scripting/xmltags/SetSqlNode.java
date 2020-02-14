@@ -22,6 +22,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo 指定后缀多余 是逗号，即 如果set标签解析后 最后是逗号，则把逗号省略
  */
 public class SetSqlNode extends TrimSqlNode {
 

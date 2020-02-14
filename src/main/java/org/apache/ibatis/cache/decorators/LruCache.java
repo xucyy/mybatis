@@ -22,13 +22,16 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * Lru (least recently used) cache decorator.
- *
+ * todo 采用lru进行缓存清理的装饰器，在需要清理缓存的时候，它会清除最近最少使用的缓存项
  * @author Clinton Begin
  */
 public class LruCache implements Cache {
 
+  //todo 被装饰的底层Cache对象
   private final Cache delegate;
+  //todo 它是已给有序的hashMap，用于记录key最近的使用情况
   private Map<Object, Object> keyMap;
+  //todo 记录最少被使用的缓存项的key
   private Object eldestKey;
 
   public LruCache(Cache delegate) {
@@ -47,13 +50,17 @@ public class LruCache implements Cache {
   }
 
   public void setSize(final int size) {
+    //todo 重新设置缓存大小时，会重置keyMap字段
+    //  accessOrder=true 表示该LinkedHashMap记录的顺序是access-order,也就是说LinkedHashMap.get()方法会改变其记录的顺序
     keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
       private static final long serialVersionUID = 4267176411845948333L;
 
+      //todo 当调用LinkedHashMap.put方法会调用该方法
       @Override
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
         if (tooBig) {
+          //todo 如果已达到上限，则更新eldestKey字段，后面会删除该项
           eldestKey = eldest.getKey();
         }
         return tooBig;

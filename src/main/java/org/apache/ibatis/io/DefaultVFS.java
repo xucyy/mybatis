@@ -50,25 +50,26 @@ public class DefaultVFS extends VFS {
     return true;
   }
 
+  //todo 负责查找指定的资源名称列表
   @Override
   public List<String> list(URL url, String path) throws IOException {
     InputStream is = null;
     try {
       List<String> resources = new ArrayList<>();
-
-      // First, try to find the URL of a JAR file containing the requested resource. If a JAR
-      // file is found, then we'll list child resources by reading the JAR.
+      //todo 如果url指向的资源在一个jar包中，则获取该jar包对应的url，否则返回null
       URL jarUrl = findJarForResource(url);
       if (jarUrl != null) {
         is = jarUrl.openStream();
         if (log.isDebugEnabled()) {
           log.debug("Listing " + url);
         }
+        //todo 遍历jar中的资源，并返回以path开头的资源列表
         resources = listResources(new JarInputStream(is), path);
       }
       else {
         List<String> children = new ArrayList<>();
         try {
+          //todo 遍历url执行的目录，将其下载原名称记录到childrenzhong
           if (isJar(url)) {
             // Some versions of JBoss VFS might give a JAR stream even if the resource
             // referenced by the URL isn't actually a JAR

@@ -25,7 +25,7 @@ import org.apache.ibatis.cache.Cache;
 /**
  * Weak Reference cache decorator.
  * Thanks to Dr. Heinz Kabutz for his guidance here.
- *
+ * todo 缓存项中存储的是 WeakEntry extends WeakReference 有虚引用的特性的缓存
  * @author Clinton Begin
  */
 public class WeakCache implements Cache {

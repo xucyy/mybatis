@@ -17,6 +17,7 @@ package org.apache.ibatis.session;
 
 /**
  * @author Clinton Begin
+ * todo 用于限制查询结果集的范围
  */
 public class RowBounds {
 

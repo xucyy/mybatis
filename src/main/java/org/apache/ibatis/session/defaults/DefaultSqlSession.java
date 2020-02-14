@@ -48,9 +48,11 @@ import org.apache.ibatis.session.SqlSession;
 public class DefaultSqlSession implements SqlSession {
 
   private final Configuration configuration;
+  //todo 用于完成数据库操作
   private final Executor executor;
 
   private final boolean autoCommit;
+  //todo  主要用于决定是否提交 /回滚事务
   private boolean dirty;
   private List<Cursor<?>> cursorList;
 
@@ -72,7 +74,7 @@ public class DefaultSqlSession implements SqlSession {
 
   @Override
   public <T> T selectOne(String statement, Object parameter) {
-    // Popular vote was to return null on 0 results and throw exception on too many.
+    // todo selectOne也是调用selectList方法，只不是只返回第一条数据
     List<T> list = this.selectList(statement, parameter);
     if (list.size() == 1) {
       return list.get(0);
@@ -95,6 +97,7 @@ public class DefaultSqlSession implements SqlSession {
 
   @Override
   public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
+    //todo selectMap也是调用selectList ，只不过是将List类型的 ，转成了Map类型返回
     final List<? extends V> list = selectList(statement, parameter, rowBounds);
     final DefaultMapResultHandler<K, V> mapResultHandler = new DefaultMapResultHandler<>(mapKey,
             configuration.getObjectFactory(), configuration.getObjectWrapperFactory(), configuration.getReflectorFactory());
@@ -143,7 +146,9 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
+      //TODO statement是执行的哪个语句也就是namespace+select节点id    parameter是执行参数
       MappedStatement ms = configuration.getMappedStatement(statement);
+      //todo 然后通过调用executor的query方法
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
@@ -189,6 +194,7 @@ public class DefaultSqlSession implements SqlSession {
     return update(statement, null);
   }
 
+  //todo insert delete 方法最后都是调用 executor的update方法
   @Override
   public int update(String statement, Object parameter) {
     try {
@@ -217,6 +223,7 @@ public class DefaultSqlSession implements SqlSession {
     commit(false);
   }
 
+  //todo 调用executor.commit
   @Override
   public void commit(boolean force) {
     try {
@@ -312,6 +319,7 @@ public class DefaultSqlSession implements SqlSession {
     cursorList.add(cursor);
   }
 
+  //todo 根据autoCommit  dirty force来判断是否需要提交 或者回滚
   private boolean isCommitOrRollbackRequired(boolean force) {
     return (!autoCommit && dirty) || force;
   }

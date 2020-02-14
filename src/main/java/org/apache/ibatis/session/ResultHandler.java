@@ -17,6 +17,7 @@ package org.apache.ibatis.session;
 
 /**
  * @author Clinton Begin
+ * todo 保存映射结果
  */
 public interface ResultHandler<T> {
 

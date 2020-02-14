@@ -53,7 +53,7 @@ import org.apache.ibatis.logging.LogFactory;
  * resolver.find(new CustomTest(), pkg2);
  * Collection&lt;ActionBean&gt; beans = resolver.getClasses();
  * </pre>
- *
+ * todo  可以根据指定的条件查找指定包下的类，其中使用的条件由Test接口表示
  * @author Tim Fennell
  */
 public class ResolverUtil<T> {
@@ -77,6 +77,7 @@ public class ResolverUtil<T> {
   /**
    * A Test that checks to see if each class is assignable to the provided class. Note
    * that this test will match the parent type itself if it is presented for matching.
+   * todo 用于检测类是否继承了指定类或接口
    */
   public static class IsA implements Test {
     private Class<?> parent;
@@ -88,7 +89,8 @@ public class ResolverUtil<T> {
 
     /** Returns true if type is assignable to the parent type supplied in the constructor. */
     @Override
-    public boolean matches(Class<?> type) {
+    public boolean matches(Class<?> type)
+    { //todo 参数type是待检测的类，如果该类符合检测的条件，则matches()方法返回true,否则返回false
       return type != null && parent.isAssignableFrom(type);
     }
 
@@ -101,6 +103,7 @@ public class ResolverUtil<T> {
   /**
    * A Test that checks to see if each class is annotated with a specific annotation. If it
    * is, then the test returns true, otherwise false.
+   * todo 用于检测类是否添加了指定的注解
    */
   public static class AnnotatedWith implements Test {
     private Class<? extends Annotation> annotation;
@@ -128,6 +131,8 @@ public class ResolverUtil<T> {
   /**
    * The ClassLoader to use when looking for classes. If null then the ClassLoader returned
    * by Thread.currentThread().getContextClassLoader() will be used.
+   * todo 记录了当前使用的类加载器，默认情况下，使用的是当前线程上下文绑定的ClassLoader，我们
+   *  可以通过setClassLoader（）方法修改使用类加载器
    */
   private ClassLoader classloader;
 
@@ -154,7 +159,7 @@ public class ResolverUtil<T> {
   /**
    * Sets an explicit ClassLoader that should be used when scanning for classes. If none
    * is set then the context classloader will be used.
-   *
+   * todo 可以设置需要使用的ClassLoader，这个ClassLoader可以从ClassLoaderWrapper中获取合适的类加载器
    * @param classloader a ClassLoader to use when scanning for classes
    */
   public void setClassLoader(ClassLoader classloader) {

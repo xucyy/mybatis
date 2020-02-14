@@ -22,18 +22,28 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo 在动态SQL语句中构建IN条件语句的时候，通常需要对一个集合进行迭代，Mybatis提供了<foreach> 标签迭代集合时，不仅可以使用集合的元素和索引值
+ *   还可以在循环开始之前或结束之后添加指定的字符串，也允许在迭代过程中添加指定的分隔符
  */
 public class ForEachSqlNode implements SqlNode {
   public static final String ITEM_PREFIX = "__frch_";
 
+  //todo 用于判断循环的终止条件，ForeachSqlNode构造方法中会创建对象
   private final ExpressionEvaluator evaluator;
+  //todo 迭代的集合表达式
   private final String collectionExpression;
+  //todo 记录了该ForeachSqlNode节点的子节点
   private final SqlNode contents;
+  //todo 在循环开始前要添加的字符串
   private final String open;
+  //todo 在循环结束后要添加的 字符串
   private final String close;
+  //todo 循环过程中，每项之间的分隔符
   private final String separator;
+  //todo index是当前迭代的次数，item的值是本次迭代的元素，若迭代集合是map,则index是键，item是值
   private final String item;
   private final String index;
+  //todo 全局配置对象
   private final Configuration configuration;
 
   public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, String index, String item, String open, String close, String separator) {
@@ -47,7 +57,14 @@ public class ForEachSqlNode implements SqlNode {
     this.item = item;
     this.configuration = configuration;
   }
-
+  //todo 1）解析集合表达式，获取对应的实际参数
+  // 2）在循环开始之前，添加open字段指定的字符串
+  // 3）开始遍历集合，根据遍历的位置和是否指定分隔符
+  // 4）调用applyIndex()方法将index添加到DynamicContext.bindings集合中，供后续解析使用
+  // 5）调用applyItem()方法将item添加到DynamicContext.bingdings结合中，供后续使用
+  // 6）转换子节点中的"#{}" 占位符，此步骤会将PrefixedContext封装成FilteredDynamicContext，在追加子节点转换结果时，就会使用FilterDynamicContext.apply()方法将
+  //  "#{}" 占位符转换成 "#{__frch_}"的格式
+  // 7）循环结束后，调用DynamicContext.appendSql 添加close指定的字符串
   @Override
   public boolean apply(DynamicContext context) {
     Map<String, Object> bindings = context.getBindings();
@@ -119,10 +136,15 @@ public class ForEachSqlNode implements SqlNode {
     return ITEM_PREFIX + item + "_" + i;
   }
 
+  //todo 负责处理 #{} 占位符 ，但它并未完全解析 #{} 占位符
   private static class FilteredDynamicContext extends DynamicContext {
+    //todo 底层封装的DynamicContext
     private final DynamicContext delegate;
+    //todo 对应集合项在集合中的索引位置
     private final int index;
+    //todo  对应集合项的index
     private final String itemIndex;
+    //todo 对应集合项的item
     private final String item;
 
     public FilteredDynamicContext(Configuration configuration,DynamicContext delegate, String itemIndex, String item, int i) {
@@ -148,16 +170,20 @@ public class ForEachSqlNode implements SqlNode {
       return delegate.getSql();
     }
 
+    //todo 会将#{item}  占位符转换成"#{__frch_item_1}" 的格式， 其中"__frch_"是固定的前缀，"item" 与处理前的占位符一样，未发生改变 1则是Filter
     @Override
     public void appendSql(String sql) {
+      //todo 创建GenericTokenParser 解析器，注意这里的匿名类是 TokenHandler对象
       GenericTokenParser parser = new GenericTokenParser("#{", "}", content -> {
+        //todo 对item进行处理
         String newContent = content.replaceFirst("^\\s*" + item + "(?![^.,:\\s])", itemizeItem(item, index));
         if (itemIndex != null && newContent.equals(content)) {
+          //todo 对itemIndex进行处理
           newContent = content.replaceFirst("^\\s*" + itemIndex + "(?![^.,:\\s])", itemizeItem(itemIndex, index));
         }
         return "#{" + newContent + "}";
       });
-
+      //todo 将解析的SQL语句片段 追击到delegate中保存
       delegate.appendSql(parser.parse(sql));
     }
 
@@ -168,10 +194,13 @@ public class ForEachSqlNode implements SqlNode {
 
   }
 
-
+  //todo 继承与DynamicContext，同时也都是DynamicContext的代理类
   private class PrefixedContext extends DynamicContext {
+    //todo 底层封装的DynamicContext
     private final DynamicContext delegate;
+    //todo 指定的前缀
     private final String prefix;
+    //todo 是否已经处理过前缀
     private boolean prefixApplied;
 
     public PrefixedContext(DynamicContext delegate, String prefix) {
@@ -195,12 +224,17 @@ public class ForEachSqlNode implements SqlNode {
       delegate.bind(name, value);
     }
 
+    //todo 会首先追加指定的prefix前缀到delegate,然后再将Sql语句片段追加到delegate中
     @Override
     public void appendSql(String sql) {
+      //todo 判断是否需要追加前缀
       if (!prefixApplied && sql != null && sql.trim().length() > 0) {
+        //todo 追加前缀
         delegate.appendSql(prefix);
+        //todo 表示已经处理前缀
         prefixApplied = true;
       }
+      //todo 追加sql片段
       delegate.appendSql(sql);
     }
 

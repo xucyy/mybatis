@@ -41,6 +41,7 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * todo 利用cglib的方式创建代理对象
  */
 public class CglibProxyFactory implements ProxyFactory {
 

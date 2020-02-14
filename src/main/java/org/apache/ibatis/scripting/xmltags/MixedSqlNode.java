@@ -19,14 +19,17 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ * todo 使用contexts字段 记录其子节点对应的SqlNode对象集合
  */
 public class MixedSqlNode implements SqlNode {
+  //记录其子节点对应的SqlNode对象集合
   private final List<SqlNode> contents;
 
   public MixedSqlNode(List<SqlNode> contents) {
     this.contents = contents;
   }
 
+  //todo 会循环调用contexts结合中所有SqlNode对象的apply()方法
   @Override
   public boolean apply(DynamicContext context) {
     contents.forEach(node -> node.apply(context));

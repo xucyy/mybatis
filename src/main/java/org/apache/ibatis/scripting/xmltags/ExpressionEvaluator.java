@@ -28,12 +28,16 @@ import org.apache.ibatis.builder.BuilderException;
  */
 public class ExpressionEvaluator {
 
+  //todo 可以帮助<if> 节点计算 test表达式 是否正确
   public boolean evaluateBoolean(String expression, Object parameterObject) {
+    //todo 首先通过OGNL解析表达式的值
     Object value = OgnlCache.getValue(expression, parameterObject);
+    //todo 处理Boolean类型
     if (value instanceof Boolean) {
       return (Boolean) value;
     }
     if (value instanceof Number) {
+      //todo 处理数字类型
       return new BigDecimal(String.valueOf(value)).compareTo(BigDecimal.ZERO) != 0;
     }
     return value != null;

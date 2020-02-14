@@ -24,9 +24,11 @@ import org.apache.ibatis.session.ResultHandler;
 
 /**
  * @author Clinton Begin
+ * todo 处理映射结果
  */
 public class DefaultResultHandler implements ResultHandler<Object> {
 
+  //todo 处理完的映射结果 ，会保存到这个list中
   private final List<Object> list;
 
   public DefaultResultHandler() {

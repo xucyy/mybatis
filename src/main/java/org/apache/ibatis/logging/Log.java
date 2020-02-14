@@ -17,6 +17,7 @@ package org.apache.ibatis.logging;
 
 /**
  * @author Clinton Begin
+ * todo log接口
  */
 public interface Log {
 

@@ -121,27 +121,35 @@ public class MapperAnnotationBuilder {
     this.configuration = configuration;
     this.type = type;
   }
-
+  //todo 解析Mapper接口中的注解信息
   public void parse() {
     String resource = type.toString();
+    //todo 检测是否已经加载过该接口
     if (!configuration.isResourceLoaded(resource)) {
+      //todo 检测是否加载对应的映射配置文件，如果未加载，则创建XMLMapperBuilder对象解析对应的映射文件，也就是XMLMapperBuilder.parse
       loadXmlResource();
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
+      //todo 解析@CacheNameSpace注解
       parseCache();
+      //todo 解析@CacheNameSpaceRef注解
       parseCacheRef();
+      //todo 获取接口中定义的全部方法
       Method[] methods = type.getMethods();
       for (Method method : methods) {
         try {
           // issue #237
           if (!method.isBridge()) {
+            //todo 解析@SelectKey @ResultMap等注解，并创建MappedStatement对象
             parseStatement(method);
           }
         } catch (IncompleteElementException e) {
+          //todo 如果解析失败，会追加到configuration的IncompleteMethod中
           configuration.addIncompleteMethod(new MethodResolver(this, method));
         }
       }
     }
+    //todo 遍历Configuration.incompleteMethods集合中记录的未解析的方法，并重新进行解析
     parsePendingMethods();
   }
 

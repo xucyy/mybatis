@@ -20,20 +20,31 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ * todo 是用来管理PooledConnection对象状态的组件，它通过两个ArrayList集合分别管理空闲状态的连接和活跃状态的连接
  */
 public class PoolState {
 
   protected PooledDataSource dataSource;
 
+  //todo 空闲的PooledConnection集合
   protected final List<PooledConnection> idleConnections = new ArrayList<>();
+  //todo 处于连接状态的PooledConnection集合
   protected final List<PooledConnection> activeConnections = new ArrayList<>();
+  //todo 请求数据库连接的次数
   protected long requestCount = 0;
+  //todo 获取连接的累计时间
   protected long accumulatedRequestTime = 0;
+  //todo checkoutTime表示应用从连接池取出连接，到归还连接这段时长。记录了所有连接累计的checkoutTime
   protected long accumulatedCheckoutTime = 0;
+  //todo 记录了超时的连接个数
   protected long claimedOverdueConnectionCount = 0;
+  //todo 累计超时时间
   protected long accumulatedCheckoutTimeOfOverdueConnections = 0;
+  //todo 累计等待时间
   protected long accumulatedWaitTime = 0;
+  //todo 等待次数
   protected long hadToWaitCount = 0;
+  //todo 无效的连接数
   protected long badConnectionCount = 0;
 
   public PoolState(PooledDataSource dataSource) {

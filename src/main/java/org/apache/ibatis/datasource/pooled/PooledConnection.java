@@ -25,6 +25,7 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Clinton Begin
+ * todo 利用JDK动态代理生成 Connection的代理对象
  */
 class PooledConnection implements InvocationHandler {
 
@@ -32,13 +33,21 @@ class PooledConnection implements InvocationHandler {
   private static final Class<?>[] IFACES = new Class<?>[] { Connection.class };
 
   private final int hashCode;
+  //todo 记录当前PooledConnection对象所在的PooledDataSource对象。当调用close方法时，会将PooledConnection放回该PoolDataSource中
   private final PooledDataSource dataSource;
+  //todo 真正的数据库连接
   private final Connection realConnection;
+  //todo 数据库连接的代理对象
   private final Connection proxyConnection;
+  //todo 从连接池中取出该连接的时间戳
   private long checkoutTimestamp;
+  //todo 该连接创建的时间戳
   private long createdTimestamp;
+  //todo 最后一次被使用的时间戳
   private long lastUsedTimestamp;
+  //todo 由数据库URL，用户名和密码计算处理出的hash值，可用于标识该连接所在的连接池
   private int connectionTypeCode;
+  //todo 检测当前PooledConnection是否有效，主要是为了防止程序通过close()方法将连接归还连接池后，依然通过该连接操作数据库
   private boolean valid;
 
   /**
@@ -59,6 +68,7 @@ class PooledConnection implements InvocationHandler {
 
   /**
    * Invalidates the connection.
+   * todo 将pooledConnection置为无效，这样这个连接就不可以用了
    */
   public void invalidate() {
     valid = false;
@@ -66,10 +76,11 @@ class PooledConnection implements InvocationHandler {
 
   /**
    * Method to see if the connection is usable.
-   *
+   * todo 检测连接是否有效
    * @return True if the connection is usable
    */
   public boolean isValid() {
+    //todo 首先 valid参数为true  ,真正的连接不能为空， 而且 发送的ping连接是通的
     return valid && realConnection != null && dataSource.pingConnection(this);
   }
 
@@ -223,7 +234,7 @@ class PooledConnection implements InvocationHandler {
 
   /**
    * Required for InvocationHandler implementation.
-   *
+   * todo 动态代理调用方法
    * @param proxy  - not used
    * @param method - the method to be executed
    * @param args   - the parameters to be passed to the method
@@ -232,7 +243,9 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
+    //todo 检测方法是否是 close方法
     if (CLOSE.equals(methodName)) {
+      //todo 如果是close方法，不是关闭连接，而是将连接推入到连接池中
       dataSource.pushConnection(this);
       return null;
     }
@@ -240,8 +253,10 @@ class PooledConnection implements InvocationHandler {
       if (!Object.class.equals(method.getDeclaringClass())) {
         // issue #579 toString() should never fail
         // throw an SQLException instead of a Runtime
+        //todo 通过valid字段判断当前连接是否有效，无效的连接，也就是放入了连接池的连接，直接报错
         checkConnection();
       }
+      //todo 调用真正的connection 方法
       return method.invoke(realConnection, args);
     } catch (Throwable t) {
       throw ExceptionUtil.unwrapThrowable(t);

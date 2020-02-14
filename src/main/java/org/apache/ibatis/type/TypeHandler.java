@@ -22,13 +22,17 @@ import java.sql.SQLException;
 
 /**
  * @author Clinton Begin
+ *
+ * todo 所有的类型转换器都继承这个接口
  */
 public interface TypeHandler<T> {
 
+  //todo 负责将数据由 Java类型转换成JdbcType类型
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**
    * @param columnName Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
+   * todo 负责将 JdbcType类型转换成java类型
    */
   T getResult(ResultSet rs, String columnName) throws SQLException;
 
