@@ -22,7 +22,7 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * FIFO (first in, first out) cache decorator.
- * todo 利用先进先出的规则清理缓存，如果缓存项的个数已经达到上限，则会将缓存中最老（即最早进入缓存）的缓存项删除
+ * todo 利用先进先出的规则清理缓存，如果缓存项的个数已经达到上限，则会将缓存中最老（即最早进入缓存）的缓存项删除 测试
  * @author Clinton Begin
  */
 public class FifoCache implements Cache {
